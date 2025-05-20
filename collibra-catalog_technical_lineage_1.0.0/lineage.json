@@ -1,0 +1,49 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Collibra Catalog Technical Lineage API",
+    "description": "<p>REST API supporting the integration between the technical lineage platform and Catalog. </p>",
+    "version": "1.0",
+    "x-audience": "public"
+  },
+  "servers": [
+    {
+      "url": "/rest/catalog/1.0",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "Technical Lineage",
+      "description": "Technical Lineage operations"
+    }
+  ],
+  "paths": {
+    "/technicalLineage/harvester/{assetId}": {
+      "post": {
+        "tags": [
+          "Technical Lineage"
+        ],
+        "summary": "Starts technical lineage harvester",
+        "description": "Starts technical lineage harvester for database asset id provided in request.",
+        "operationId": "triggerHarvester",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The lineage harvester has been started."
+          }
+        }
+      }
+    }
+  }
+}

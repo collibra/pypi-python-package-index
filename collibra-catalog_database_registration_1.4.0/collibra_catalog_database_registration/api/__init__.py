@@ -1,0 +1,10 @@
+from __future__ import absolute_import
+
+# flake8: noqa
+
+# import apis into api package
+from collibra_catalog_database_registration.api.database_api import DatabaseApi
+from collibra_catalog_database_registration.api.database_connection_api import DatabaseConnectionApi
+from collibra_catalog_database_registration.api.metadata_api import MetadataApi
+from collibra_catalog_database_registration.api.profiling_api import ProfilingApi
+from collibra_catalog_database_registration.api.schema_connection_api import SchemaConnectionApi

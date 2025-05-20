@@ -1,0 +1,1586 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Collibra Catalog Classification API",
+    "description": "<p>The Catalog API offers functionality related to the catalog product.<br/> It is mainly focused on facilitating the ingestion of information into Catalog. The API enables users to more easily connect Catalog to sources that are not necessarily natively supported in the product. </p>",
+    "version": "1.0",
+    "x-audience": "public"
+  },
+  "servers": [
+    {
+      "url": "/rest/catalog/1.0",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "Data Classification",
+      "description": "Classification of data operations"
+    }
+  ],
+  "paths": {
+    "/dataClassification/classificationMatches": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Finds Classification Matches",
+        "description": "Returns Classification Matches matching the given search criteria defined by request. Only parameters that are specified in this request and have not <code>null</code> values are used for filtering. All other parameters are ignored. The returned Classification Matches satisfy all constraints that are specified in this search criteria. This endpoint will be removed in the next major release. Please, use GET /bulk",
+        "operationId": "findClassificationMatches",
+        "requestBody": {
+          "description": "The search criteria of the Classification Matches to be found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindClassificationMatchesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The found Classification Matches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseClassificationMatch"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Adds new Classification Match",
+        "operationId": "addClassificationMatch",
+        "requestBody": {
+          "description": "The request with data needed for creation of new classification match.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddClassificationMatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Newly created Classification Match.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Classification or Asset not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Classification Match between provided Asset and Classification already exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classificationMatches/bulk": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Finds Classification Matches",
+        "description": "Returns Classification Matches matching the given search criteria defined by query params that form the request. Only parameters that are specified in this request and have not <code>null</code> values are used for filtering. All other parameters are ignored. The returned Classification Matches satisfy all constraints that are specified in this search criteria.",
+        "operationId": "findClassificationMatchesWithParams",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The first result to retrieve. If not set (offset = <code>0</code>), results will be retrieved starting from row <code>0</code>.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results to retrieve. If not set (limit = <code>0</code>), the default limit will be used. The maximum allowed limit is 1000.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "countLimit",
+            "in": "query",
+            "description": "Allows to limit the number of elements that will be counted. -1 will count everything and 0 will cause the count to be skipped",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": -1
+            }
+          },
+          {
+            "name": "assetIds",
+            "in": "query",
+            "description": "The <code>id</code>s of the assets (with Column types) to filter by the search results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "description": "The list of classification match statuses to filter by the search results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ACCEPTED",
+                  "REJECTED",
+                  "SUGGESTED"
+                ]
+              }
+            }
+          },
+          {
+            "name": "classificationIds",
+            "in": "query",
+            "description": "The list of classification ids to filter by the search results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "assetTypeIds",
+            "in": "query",
+            "description": "The list of asset type ids to filter by the search results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found Classification Matches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseClassificationMatch"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Adds new Classification Matches",
+        "operationId": "addClassificationMatches",
+        "requestBody": {
+          "description": "The request with data needed for creation of new classification matches.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddClassificationMatchesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Newly created Classification Matches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Classification or Asset not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Classification Match between provided Asset and Classification already exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Removes multiple Classification Matches",
+        "description": "Removes multiple Classification Matches with IDs provided in request body.",
+        "operationId": "removeClassificationMatches",
+        "requestBody": {
+          "description": "The list of Classification Match IDs to be deleted.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteClassificationMatchesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Removed all Classification Matches with given IDs."
+          },
+          "404": {
+            "description": "At least one of the Classification Matches to be deleted was not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Changes multiple Classification Matches",
+        "description": "Changes multiple Classification Matches with the information that is present in the requests. Only properties that are specified in the requests and have not <code>null</code> values are updated. All other properties are ignored.",
+        "operationId": "changeClassificationMatches",
+        "requestBody": {
+          "description": "The list of properties of the Classification Matches to be changed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChangeClassificationMatchRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The changed Classification Matches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassificationMatch"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Classification Match(es) not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classificationMatches/{classificationMatchId}": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Gets existing Classification Match by id.",
+        "operationId": "getClassificationMatch",
+        "parameters": [
+          {
+            "name": "classificationMatchId",
+            "in": "path",
+            "description": "The id of the Classification Match to be fetched",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Classification Match not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Removes existing Classification Match.",
+        "operationId": "removeClassificationMatch",
+        "parameters": [
+          {
+            "name": "classificationMatchId",
+            "in": "path",
+            "description": "The id of the Classification Match to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed Classification Match."
+          },
+          "404": {
+            "description": "Classification Match not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Changes a Classification Match",
+        "description": "Changes the Classification Match with the information that is present in the request. Only properties that are specified in this request and have not <code>null</code> values are updated. All other properties are ignored.",
+        "operationId": "changeClassificationMatch",
+        "parameters": [
+          {
+            "name": "classificationMatchId",
+            "in": "path",
+            "description": "The id of the Classification Match to be changed",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The properties of the Classification Match to be changed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeClassificationMatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The changed Classification Match.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationMatch"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Classification Match not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classifications": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Finds Classifications",
+        "description": "Returns Classifications matching the given search criteria defined by request. Only parameters that are specified in this request and have not <code>null</code> values are used for filtering. All other parameters are ignored. The returned Classifications satisfy all constraints that are specified in this search criteria. This endpoint will be removed in the next major release. Please, use GET /bulk",
+        "operationId": "findClassifications",
+        "requestBody": {
+          "description": "The search criteria of the Classifications to be found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindClassificationsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The found Classifications.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseClassification"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Adds new Classification",
+        "operationId": "addClassification",
+        "requestBody": {
+          "description": "The request with data needed for creation of new classification.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddClassificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Newly created Classification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classifications/{classificationId}": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Gets existing Classification by id.",
+        "operationId": "getClassification",
+        "parameters": [
+          {
+            "name": "classificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Classification not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Removes existing Classification. WARNING: This will also remove all ClassificationMatches that are joined with this Classification!",
+        "operationId": "removeClassification",
+        "parameters": [
+          {
+            "name": "classificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed Classification."
+          },
+          "404": {
+            "description": "Classification not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Changes existing Classification",
+        "operationId": "changeClassification",
+        "parameters": [
+          {
+            "name": "classificationId",
+            "in": "path",
+            "description": "The id of the Classification to be changed",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The properties of the Classification to be changed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeClassificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changed Classification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Classification not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classifications/classify": {
+      "post": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Starts a job that classifies datasets, databases, schemas, tables or columns by external service based on sample data.",
+        "operationId": "classify",
+        "requestBody": {
+          "description": "The request with data needed for running classification job.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "Asset to classify not found."
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/dataClassification/classifications/bulk": {
+      "get": {
+        "tags": [
+          "Data Classification"
+        ],
+        "summary": "Finds Classifications",
+        "description": "Returns Classifications matching the given search criteria defined by query params that form the request. Only parameters that are specified in this request and have not <code>null</code> values are used for filtering. All other parameters are ignored. The returned Classifications satisfy all constraints that are specified in this search criteria.",
+        "operationId": "findClassificationsBulk",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The first result to retrieve. If not set (offset = <code>0</code>), results will be retrieved starting from row <code>0</code>.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results to retrieve. If not set (limit = <code>0</code>), the default limit will be used. The maximum allowed limit is 1000.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "countLimit",
+            "in": "query",
+            "description": "Allows to limit the number of elements that will be counted. -1 will count everything and 0 will cause the count to be skipped",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": -1
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "The exact name of classification to filter by the search results.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found Classifications.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseClassification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Classification": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the represented object (entity).",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The id of the user that created this resource.",
+            "format": "uuid",
+            "example": "4d250cc5-e583-4640-9874-b93d82c7a6cb"
+          },
+          "createdOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the creation of this resource.",
+            "format": "int64",
+            "example": 1475503010320
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "The id of the user who modified this resource the last time.",
+            "format": "uuid",
+            "example": "a073ff90-e7bc-4b35-ba90-c4d475f642fe"
+          },
+          "lastModifiedOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the last modification of this resource.",
+            "format": "int64",
+            "example": 1476703764163
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Whether this is a system resource or not."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of this resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the resource.",
+            "example": "Test name"
+          }
+        },
+        "description": "Represents classification of data."
+      },
+      "ClassificationMatch": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the represented object (entity).",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The id of the user that created this resource.",
+            "format": "uuid",
+            "example": "4d250cc5-e583-4640-9874-b93d82c7a6cb"
+          },
+          "createdOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the creation of this resource.",
+            "format": "int64",
+            "example": 1475503010320
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "The id of the user who modified this resource the last time.",
+            "format": "uuid",
+            "example": "a073ff90-e7bc-4b35-ba90-c4d475f642fe"
+          },
+          "lastModifiedOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the last modification of this resource.",
+            "format": "int64",
+            "example": 1476703764163
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Whether this is a system resource or not."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of this resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of data classification match assigned to an asset.",
+            "example": "SUGGESTED"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "The confidence of the data classification match between classification and an asset.",
+            "format": "double",
+            "example": 0.56
+          },
+          "asset": {
+            "$ref": "#/components/schemas/NamedResourceReferenceImpl"
+          },
+          "classification": {
+            "$ref": "#/components/schemas/Classification"
+          }
+        },
+        "description": "Represents match between classification of data and an asset."
+      },
+      "NamedResourceReferenceImpl": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the referenced resource.",
+            "format": "uuid",
+            "example": "2b7f3a1a-4e50-4077-96f0-a58a395c860d"
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of the resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "example": "Community",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the referenced resource."
+          }
+        },
+        "description": "Represents reference to the resource, including its name."
+      },
+      "AddClassificationMatchRequest": {
+        "required": [
+          "assetId",
+          "classificationId"
+        ],
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "description": "The <code>id</code> of an asset for which classification matches will be added.",
+            "format": "uuid"
+          },
+          "classificationId": {
+            "type": "string",
+            "description": "The <code>id</code> of classification to be used in created classification match.",
+            "format": "uuid"
+          }
+        },
+        "description": "Request for adding classification match."
+      },
+      "AddClassificationMatchesRequest": {
+        "required": [
+          "assetId",
+          "classificationIds"
+        ],
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "description": "The <code>id</code> of an asset for which classification matches will be added.",
+            "format": "uuid"
+          },
+          "classificationIds": {
+            "type": "array",
+            "description": "The list of <code>id</code> of classifications to be used in created classification matches.",
+            "items": {
+              "type": "string",
+              "description": "The list of <code>id</code> of classifications to be used in created classification matches.",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request for adding classification matches for many classes."
+      },
+      "ChangeClassificationMatchRequest": {
+        "type": "object",
+        "properties": {
+          "classificationMatchId": {
+            "type": "string",
+            "description": "The <code>id</code> of the classification match.",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status to be set on classification match with given id. Only possible choices : ACCEPTED, REJECTED.",
+            "enum": [
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "description": "The confidence level between 0-1 which the current match is assigned with.",
+            "format": "double"
+          }
+        },
+        "description": "The criteria for changing classification match."
+      },
+      "PagedResponseClassificationMatch": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "The total number of results.",
+            "format": "int64",
+            "example": 1000
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The offset for the results.",
+            "format": "int64",
+            "example": 10
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of results to be returned.",
+            "format": "int64",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "The list of results.",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationMatch"
+            }
+          }
+        },
+        "description": "Response containing the paged information."
+      },
+      "FindClassificationMatchesRequest": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assetIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ACCEPTED",
+                "REJECTED",
+                "SUGGESTED"
+              ]
+            }
+          },
+          "classificationIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "assetTypeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "The search criteria for finding classification matches."
+      },
+      "DeleteClassificationMatchesRequest": {
+        "type": "object",
+        "properties": {
+          "classificationMatchIds": {
+            "type": "array",
+            "description": "The list of classification match ids.",
+            "items": {
+              "type": "string",
+              "description": "The list of classification match ids.",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "The request for deleting classification match."
+      },
+      "AddClassificationRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New Classification name"
+          }
+        },
+        "description": "Request to add Classification"
+      },
+      "ChangeClassificationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New name"
+          }
+        },
+        "description": "Request to change Classification"
+      },
+      "Job": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the represented object (entity).",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The id of the user that created this resource.",
+            "format": "uuid",
+            "example": "4d250cc5-e583-4640-9874-b93d82c7a6cb"
+          },
+          "createdOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the creation of this resource.",
+            "format": "int64",
+            "example": 1475503010320
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "The id of the user who modified this resource the last time.",
+            "format": "uuid",
+            "example": "a073ff90-e7bc-4b35-ba90-c4d475f642fe"
+          },
+          "lastModifiedOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the last modification of this resource.",
+            "format": "int64",
+            "example": 1476703764163
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Whether this is a system resource or not."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of this resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the resource.",
+            "example": "Test name"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the job.",
+            "example": "IMPORT"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user that initiated this job.",
+            "format": "uuid"
+          },
+          "visibility": {
+            "type": "integer",
+            "description": "The visibility of the job.",
+            "format": "int32"
+          },
+          "progressPercentage": {
+            "type": "number",
+            "description": "The progress percentage of the job.",
+            "format": "double",
+            "example": 50
+          },
+          "cancelable": {
+            "type": "boolean",
+            "description": "Whether this job is cancelable or not. If set to false it will not be possible to cancel the job once submitted."
+          },
+          "startDate": {
+            "type": "integer",
+            "description": "The start date of the job.",
+            "format": "int64",
+            "example": 1488016800
+          },
+          "endDate": {
+            "type": "integer",
+            "description": "The end date of the job.",
+            "format": "int64",
+            "example": 1488021800
+          },
+          "state": {
+            "type": "string",
+            "description": "The state of the job.",
+            "example": "COMPLETED",
+            "enum": [
+              "WAITING",
+              "RUNNING",
+              "CANCELING",
+              "COMPLETED",
+              "CANCELED",
+              "ERROR"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "description": "The result of the job.",
+            "example": "SUCCESS",
+            "enum": [
+              "NOT_SET",
+              "SUCCESS",
+              "COMPLETED_WITH_ERROR",
+              "FAILURE",
+              "ABORTED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "The message of the job.",
+            "example": "Import finished in 12s."
+          }
+        },
+        "description": "Represents a job. Job is a single atomic task that is to be performed asynchronously"
+      },
+      "ClassifyRequest": {
+        "type": "object",
+        "properties": {
+          "assetIds": {
+            "type": "array",
+            "description": "Ids of assets (with Column, Table, Schema, Database or DataSet type) that will be classified.",
+            "items": {
+              "type": "string",
+              "description": "Ids of assets (with Column, Table, Schema, Database or DataSet type) that will be classified.",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request to classify data."
+      },
+      "PagedResponseClassification": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "The total number of results.",
+            "format": "int64",
+            "example": 1000
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The offset for the results.",
+            "format": "int64",
+            "example": 10
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of results to be returned.",
+            "format": "int64",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "The list of results.",
+            "items": {
+              "$ref": "#/components/schemas/Classification"
+            }
+          }
+        },
+        "description": "Response containing the paged information."
+      },
+      "FindClassificationsRequest": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "The search criteria for finding classification."
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}

@@ -1,0 +1,1904 @@
+openapi: 3.0.3
+info:
+  version: 1.4.0
+  x-audience: public
+  title: Collibra Catalog Database Registration API
+  description: >
+    This API allows you to manage the **metadata ingestion**, **profiling**, and
+    **classification** of databases via Edge.
+
+
+    It provides the following functionalities:
+
+    - Query and synchronize the database and schema connections.
+
+    - Register the databases to be ingested, profiled and classified.
+
+    - Configure and trigger the metadata ingestion of databases.
+
+    - Configure and trigger the profiling and classification of databases.
+servers:
+  - url: /rest/catalogDatabase/v1
+tags:
+  - name: Database
+    description: >-
+      Registration and management of the databases to be synchronized, profiled
+      and more.
+  - name: Metadata
+    description: Configuration and execution of metadata synchronization.
+  - name: Profiling
+    description: Configuration and execution of database profiling and classification.
+  - name: Database Connection
+    description: Management of database connections.
+  - name: Schema Connection
+    description: Management of schema connections.
+paths:
+  /databaseConnections:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/EdgeConnectionId'
+        - $ref: '#/components/parameters/SchemaConnectionId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      summary: List database connections
+      description: >
+        Returns a list of available database connections, which you can use to
+        register Database assets.
+
+
+        This API only returns the connections that have already been
+        synchronized with the catalog.
+
+        If a specific database connection is missing, the
+        */databaseConnections/refresh* API can be called to refresh
+
+        the database connections available in the catalog with the data source.
+      operationId: findDatabaseConnections
+      tags:
+        - Database Connection
+      responses:
+        '200':
+          description: Database connections successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseConnectionPagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+  '/databaseConnections/{databaseConnectionId}':
+    get:
+      summary: Retrieve a database connection
+      description: Returns a specific database schema connection.
+      operationId: getDatabaseConnection
+      parameters:
+        - $ref: '#/components/parameters/DatabaseConnectionIdInPath'
+      tags:
+        - Database Connection
+      responses:
+        '200':
+          $ref: '#/components/responses/DatabaseConnectionResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /databaseConnections/refresh:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/EdgeConnectionIdMandatory'
+      summary: Refresh database connections from the data source
+      description: >
+        Retrieve the database connections linked to a specific Edge connection
+        and create the new database connections in Catalog.
+
+
+        This is an *asynchronous API* since it needs to reach out to the data
+        source via Edge to retrieve the list of
+
+        available database connections, which can take some time.
+      operationId: refreshDatabaseConnections
+      tags:
+        - Database Connection
+      responses:
+        '202':
+          $ref: >-
+            #/components/responses/DatabaseConnectionsSynchronizationStartedResponse
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+  /schemaConnections:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/DatabaseConnectionId'
+        - $ref: '#/components/parameters/SchemaId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      summary: List schema connections
+      description: >
+        Returns a list of available schema connections, which you can use to
+        define metadata synchronization configurations
+
+        for schemas.
+
+
+        This API only returns the connections that have already been
+        synchronized with the catalog.
+
+        If a specific schema connection is missing, you can call the
+        */schemaConnections/refresh* API to synchronize
+
+        the schema connections available in Catalog with the data source.
+      operationId: findSchemaConnections
+      tags:
+        - Schema Connection
+      responses:
+        '200':
+          description: Schema connections successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaConnectionPagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+  '/schemaConnections/{schemaConnectionId}':
+    get:
+      summary: Retrieve a schema connection
+      description: Returns a specific schema connection.
+      operationId: getSchemaConnection
+      parameters:
+        - $ref: '#/components/parameters/SchemaConnectionIdInPath'
+      tags:
+        - Schema Connection
+      responses:
+        '200':
+          $ref: '#/components/responses/SchemaConnectionResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /schemaConnections/refresh:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/DatabaseConnectionIdMandatory'
+      summary: Refresh schema connections from the data source
+      description: >
+        Refresh the schema connections for a given database connection.
+
+
+        This is an *asynchronous API* since it needs to reach out to the data
+        source via Edge to retrieve the list of
+
+        available schema connections , which can take some time.
+      operationId: refreshSchemaConnections
+      tags:
+        - Schema Connection
+      responses:
+        '202':
+          $ref: >-
+            #/components/responses/SchemaConnectionsSynchronizationStartedResponse
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+  /databases:
+    get:
+      tags:
+        - Database
+      summary: Find Database assets
+      description: Finds Databases based on the provided criteria.
+      operationId: findDatabases
+      parameters:
+        - name: parentSystemId
+          in: query
+          description: The ID of the parent *System* asset.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: edgeConnectionId
+          in: query
+          description: The ID of the Edge connection.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: databaseConnectionId
+          in: query
+          description: The ID of the database connection
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Databases successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabasePagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+    post:
+      summary: Create a Database asset
+      description: >
+        Creates a Database asset in a specific community, which then allows the
+        ingestion, profiling and other
+
+        capabilities for a specific database.
+      operationId: addDatabase
+      tags:
+        - Database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDatabaseRequest'
+      responses:
+        '201':
+          description: Database asset successfully created.
+          headers:
+            Location:
+              description: Reference to the database GET API
+              schema:
+                type: string
+                format: url
+                example: >-
+                  https://hostname/databases/2ffbd52a-6324-4337-9176-49ab9c66f6c9
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+  '/databases/{databaseId}':
+    parameters:
+      - $ref: '#/components/parameters/DatabaseIdInPath'
+    get:
+      tags:
+        - Database
+      summary: Get a Database asset
+      description: Gets a single Database asset by its identifier.
+      operationId: getDatabase
+      responses:
+        '200':
+          description: Database successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Database
+      summary: Change a Database asset
+      description: |
+
+
+        Changes a Database asset based on its identifier and a set of properties
+          to change.
+
+          This is a partial update and properties that are not provided will not be changed.
+      operationId: changeDatabase
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeDatabaseRequest'
+      responses:
+        '200':
+          description: >-
+            Database asset successfully updated. The response includes the
+            updated Database.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/databases/{databaseId}/synchronizeMetadata':
+    post:
+      tags:
+        - Metadata
+      summary: Synchronize metadata for a Database asset
+      description: >
+        Triggers the database synchronization job for a list of schema
+        connections.
+
+
+        This API executes the metadata synchronization as an *asynchronous job*
+        and returns the job ID of the triggered
+
+        job in the response.
+
+
+        To monitor the status of a job, use the Jobs resource of the REST Core
+        API: GET /jobs/{jobId}.
+      operationId: synchronizeDatabaseMetadata
+      parameters:
+        - $ref: '#/components/parameters/DatabaseIdInPath'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseMetadataSynchronizationRequest'
+      responses:
+        '202':
+          $ref: '#/components/responses/DatabaseSynchronizationStartedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /schemaMetadataConfigurations:
+    get:
+      tags:
+        - Metadata
+      summary: List schema metadata synchronization configurations
+      description: >-
+        Returns the schema metadata configurations defined for the given
+        criteria.
+      operationId: findSchemaMetadataConfigurations
+      parameters:
+        - $ref: '#/components/parameters/SchemaConnectionId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: The schema metadata configuration defined for the given criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaMetadataConfigurationPagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Metadata
+      summary: Add a schema metadata synchronization configuration
+      description: >
+        Creates a schema metadata configuration.
+
+
+        Only a single configuration can be created for a single schema
+        connection id.
+      operationId: addSchemaMetadataConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSchemaMetadataConfigurationRequest'
+      responses:
+        '201':
+          description: >
+            The schema metadata configuration has been created succesfully. The
+            created configuration is
+
+            included in the response.
+          headers:
+            Location:
+              description: Reference to the schema metadata configuration GET API
+              schema:
+                type: string
+                format: url
+                example: >-
+                  https://hostname/schemaMetadataConfigurations/2ffbd52a-6324-4337-9176-49ab9c66f6c9
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaMetadataConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /schemaMetadataConfigurations/batch:
+    post:
+      tags:
+        - Metadata
+      summary: Add multiple schema metadata synchronization configurations
+      description: >
+        Adds multiple schema metadata synchronization configurations.
+
+
+        This operation is executed in a single transaction, that creates all the
+        configurations. In case the operation fails,
+
+        none of the configurations are created.
+      operationId: addMultipleSchemaMetadataConfigurations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSchemaMetadataConfigurationBatchRequest'
+      responses:
+        '201':
+          description: >
+            The schema metadata configurations have been created succesfully.
+            The created schema metadata
+
+            configurations are included in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaMetadataConfigurations'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/schemaMetadataConfigurations/{schemaMetadataConfigurationId}':
+    parameters:
+      - $ref: '#/components/parameters/SchemaMetadataConfigurationId'
+    get:
+      tags:
+        - Metadata
+      summary: Retrieve a schema metadata synchronization configuration
+      description: >-
+        Returns the schema metadata configuration defined for the given
+        criteria.
+      operationId: getSchemaMetadataConfiguration
+      responses:
+        '200':
+          description: >-
+            The schema metadata configuration defined for the given database and
+            optionally schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaMetadataConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Metadata
+      summary: Delete schema metadata synchronization configuration
+      description: Deletes a given schema metadata synchronization configuration.
+      operationId: deleteSchemaMetadataConfiguration
+      responses:
+        '204':
+          description: The schema metadata configuration was succesfully deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    put:
+      tags:
+        - Metadata
+      summary: Update schema metadata synchronization configuration
+      description: |
+        Updates a schema metadata synchronization configuration.
+      operationId: changeSchemaMetadataConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSchemaMetadataConfigurationRequest'
+      responses:
+        '200':
+          description: The schema metadata configuration was updated succesfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaMetadataConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/databases/{databaseId}/profile':
+    post:
+      tags:
+        - Profiling
+      summary: Profile and classify a Database asset
+      description: >
+        Triggers the *profiling & classification job* for a specific Database
+        asset.
+
+
+        This API executes the profiling and classification as an *asynchronous
+        job* and returns the job id of the triggered job in the response.
+
+        To monitor the status of a job, use the Jobs resource of the REST Core
+        API: GET /jobs/{jobId}.
+      operationId: profileDatabase
+      parameters:
+        - $ref: '#/components/parameters/DatabaseIdInPath'
+      responses:
+        '202':
+          $ref: '#/components/responses/DatabaseProfilingStartedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /profilingConfigurations:
+    get:
+      tags:
+        - Profiling
+      summary: List profiling and classification configurations
+      description: >-
+        Returns the profiling and classification configurations defined for the
+        given criteria.
+      operationId: findProfilingConfigurations
+      parameters:
+        - $ref: '#/components/parameters/DatabaseId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: >-
+            The profiling and classification configurations defined for the
+            given criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingConfigurationPagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Profiling
+      summary: Add profiling and classification configuration
+      description: >
+        Creates a profiling and classification configuration for a specific
+        Database asset.
+
+        This profiling and classification configuration provides a *default*
+        configuration that applies to all schemas in the Database asset.
+
+        You can define only a single *default* profiling and classification
+        configuration for a specific Database asset.
+
+         To define schema-specific profiling and classification configurations, use the */schemaProfilingConfigurations* endpoints.
+      operationId: addProfilingConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddProfilingConfigurationRequest'
+      responses:
+        '201':
+          description: The profiling configuration has been created.
+          headers:
+            Location:
+              description: Reference to the profiling configuration GET API
+              schema:
+                type: string
+                format: url
+                example: >-
+                  https://hostname/profilingConfigurations/2ffbd52a-6324-4337-9176-49ab9c66f6c9
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/profilingConfigurations/{profilingConfigurationId}':
+    parameters:
+      - $ref: '#/components/parameters/ProfilingConfigurationId'
+    get:
+      tags:
+        - Profiling
+      summary: Retrieve a profiling and classification configuration
+      description: |
+        Returns a profiling and classification configuration.
+      operationId: getProfilingConfiguration
+      responses:
+        '200':
+          description: The profiling configuration and classification configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Profiling
+      summary: Update profiling and classification configuration
+      description: |
+        Updates a profiling and classification configuration.
+      operationId: updateProfilingConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeProfilingConfigurationRequest'
+      responses:
+        '200':
+          description: The profiling and classification configuration has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Profiling
+      summary: Delete profiling and classification configuration
+      description: |
+        Deletes a profiling and classification configuration.
+      operationId: deleteProfilingConfiguration
+      responses:
+        '204':
+          description: The profiling and classification configuration has been deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /schemaProfilingConfigurations:
+    get:
+      tags:
+        - Profiling
+      summary: List schema profiling and classification configurations
+      description: >
+        Returns the schema-specific profiling and classification configurations
+        defined for the given criteria.
+
+        You can apply a *filter* on the schema connection or database to return
+        only the configurations defined for a given schema or database.
+      operationId: findSchemaProfilingConfigurations
+      parameters:
+        - $ref: '#/components/parameters/SchemaConnectionId'
+        - $ref: '#/components/parameters/DatabaseId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: >-
+            The schema profiling and classification configurations defined for
+            the given database and (optionally) schema.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaProfilingConfigurationPagedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Profiling
+      summary: Add schema profiling and classification configuration
+      description: >-
+        Creates a profiling and classification configuration for a specific
+        schema.
+      operationId: addSchemaProfilingConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSchemaProfilingConfigurationRequest'
+      responses:
+        '201':
+          description: >-
+            The schema profiling and classification configuration has been
+            created.
+          headers:
+            Location:
+              description: Reference to the schema profiling configuration GET API
+              schema:
+                type: string
+                format: url
+                example: >-
+                  https://hostname/schemaProfilingConfigurations/2ffbd52a-6324-4337-9176-49ab9c66f6c9
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /schemaProfilingConfigurations/batch:
+    post:
+      tags:
+        - Profiling
+      summary: Add multiple schema profiling configurations
+      description: >
+        Add multiple schema profiling configurations.
+
+
+        This operation is executed in a single transaction, that creates all the
+        configurations. In case the operation fails, none of the configurations
+        are created.
+      operationId: addMultipleSchemaProfilingConfigurations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSchemaProfilingConfigurationBatchRequest'
+      responses:
+        '201':
+          description: >
+            The schema profiling configurations have been created succesfully.
+            The created profiling
+
+            configurations are included in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaProfilingConfigurations'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/schemaProfilingConfigurations/{schemaProfilingConfigurationId}':
+    parameters:
+      - $ref: '#/components/parameters/SchemaProfilingConfigurationId'
+    get:
+      tags:
+        - Profiling
+      summary: Retrieve schema profiling and classification configuration
+      description: Returns a specific schema profiling and classification configuration.
+      operationId: getSchemaProfilingConfiguration
+      responses:
+        '200':
+          description: >-
+            The schema profiling and classification configuration identified by
+            the given identifier.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Profiling
+      summary: Update schema profiling and classification configuration
+      description: >
+        Updates a specific profiling and classification configuration.
+
+
+        You can only update some attributes of the schema profiling and
+        classification configuration via this API. The attributes
+
+        that are not provided in the request are not modified.
+      operationId: changeSchemaProfilingConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSchemaProfilingConfigurationRequest'
+      responses:
+        '200':
+          description: The profiling and classification configuration has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaProfilingConfiguration'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Profiling
+      summary: Delete schema profiling and classification configuration
+      description: Deletes a schema profiling and classification configuration.
+      operationId: deleteSchemaProfilingConfiguration
+      responses:
+        '204':
+          description: >-
+            The schema profiling and classification configuration has been
+            deleted successfully.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+components:
+  parameters:
+    DatabaseIdInPath:
+      name: databaseId
+      in: path
+      description: The ID of the Database asset.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DatabaseId:
+      name: databaseId
+      in: query
+      description: The ID of the Database asset.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    SchemaConnectionId:
+      name: schemaConnectionId
+      in: query
+      description: The ID of the schema connection.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    SchemaConnectionIdInPath:
+      name: schemaConnectionId
+      in: path
+      description: The ID of the schema connection.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SchemaId:
+      name: schemaId
+      in: query
+      description: The ID of the Schema asset.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    SchemaMetadataConfigurationId:
+      name: schemaMetadataConfigurationId
+      in: path
+      description: The ID of the schema metadata configuration.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SchemaProfilingConfigurationId:
+      name: schemaProfilingConfigurationId
+      in: path
+      description: The ID of the schema profiling configuration.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProfilingConfigurationId:
+      name: profilingConfigurationId
+      in: path
+      description: The ID of the profiling configuration.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EdgeConnectionId:
+      name: edgeConnectionId
+      in: query
+      description: The ID of the Edge connection.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    EdgeConnectionIdMandatory:
+      name: edgeConnectionId
+      in: query
+      description: The ID of the Edge connection.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DatabaseConnectionIdMandatory:
+      name: databaseConnectionId
+      in: query
+      description: The ID of the database connection.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DatabaseConnectionId:
+      name: databaseConnectionId
+      in: query
+      description: The ID of the database connection.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    DatabaseConnectionIdInPath:
+      name: databaseConnectionId
+      in: path
+      description: The ID of the database connection.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Offset:
+      name: offset
+      in: query
+      description: >
+        The index of the first result to retrieve.
+
+
+        If not set (offset = <code>0</code>), results will be retrieved starting
+        from row <code>0</code>.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    Limit:
+      name: limit
+      in: query
+      description: >
+        The maximum number of results to retrieve.
+
+
+        If not set, the default limit  (limit = <code>0</code>) will be used.
+        The maximum value for this parameter is
+
+        <code>500<code>.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        maximum: 500
+  schemas:
+    AddDatabaseRequest:
+      description: Request to register a Database asset linked with a database connection.
+      type: object
+      required:
+        - databaseConnectionId
+        - communityId
+        - parentSystemId
+        - ownerIds
+      properties:
+        databaseConnectionId:
+          type: string
+          format: uuid
+          description: >
+            The ID of the database connection. The name of a database connection
+            becomes the name of Database asset.
+        communityId:
+          type: string
+          format: uuid
+          description: >-
+            The ID of the parent community in which the initial domain and
+            database asset will be created.
+        parentSystemId:
+          type: string
+          format: uuid
+          description: >-
+            The ID of the parent *System* asset. After registering a database, a
+            relation of type *Technology Asset groups / is grouped by technology
+            Asset* is created between the System asset and the Database asset.
+        ownerIds:
+          type: array
+          description: >
+            The IDs of the users that are assigned as the Owner of the
+            automatically created domain containing
+
+            the Database asset.
+          items:
+            type: string
+            format: uuid
+        description:
+          type: string
+          description: A description of the database.
+          example: Customer Database
+    ChangeDatabaseRequest:
+      type: object
+      description: >-
+        Request to change a Database asset. Only the provided properties are
+        updated.
+      properties:
+        description:
+          type: string
+          example: Customer Database
+          description: A description of the database.
+        parentSystemId:
+          type: string
+          format: uuid
+          description: >
+            The ID of the parent System asset.
+
+
+            After registering a database, a relation of type *Technology Asset
+            groups / is grouped by technology Asset*
+
+            is created between the System asset and the Database asset.
+        ownerIds:
+          type: array
+          description: >
+            The ID of the users that will be assigned as the Owner of existing
+            domain containing the Database asset.
+          items:
+            type: string
+            format: uuid
+    DatabaseConnection:
+      type: object
+      description: The connection reference to the specific database.
+      required:
+        - id
+        - edgeConnectionId
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the database connection.
+        name:
+          type: string
+          description: The exact name of a database (catalog) read from the source.
+          example: customer_db
+        edgeConnectionId:
+          type: string
+          format: uuid
+          description: The ID of the Edge connection.
+        databaseId:
+          type: string
+          format: uuid
+          description: The ID of the Database asset linked with this database connection.
+    SchemaConnection:
+      type: object
+      description: The connection reference to the specific schema.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the schema connection.
+        name:
+          type: string
+          description: The exact name of a schema read from the source.
+          example: customer_schema
+        databaseConnectionId:
+          type: string
+          format: uuid
+          description: The ID of the database connection.
+        schemaId:
+          type: string
+          format: uuid
+          description: The ID of the Schema asset linked with this schema connection.
+    Database:
+      type: object
+      description: >
+        A Database asset created trough database registration with all necessary
+        information required to run
+
+        capabilities on top of it.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the Database asset.
+          readOnly: true
+        name:
+          type: string
+          example: customer_db
+          description: The name of the Database asset.
+        description:
+          type: string
+          example: Customer Database
+          description: A description of the Database asset.
+        communityId:
+          type: string
+          format: uuid
+          description: >-
+            The ID of the parent community in which the initial domain and
+            database asset are created.
+        ownerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: Users that are assigned as the Owner of the Database asset.
+        parentSystemId:
+          type: string
+          format: uuid
+          description: The ID of the parent System asset.
+        databaseConnectionId:
+          type: string
+          format: uuid
+          description: The ID of the database connection linked to the Database asset.
+        edgeConnectionId:
+          type: string
+          format: uuid
+          description: The ID of the Edge connection.
+          deprecated: true
+    DatabasePagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/Database'
+    DatabaseConnectionPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/DatabaseConnection'
+    SchemaConnectionPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/SchemaConnection'
+    DatabaseMetadataSynchronizationRequest:
+      type: object
+      properties:
+        schemaConnectionIds:
+          description: >
+            The list of the schemas identified by the schema connection ID for
+            which you want to synchronize metadata.
+
+            If left empty all schemas with rules defined are synchronized.
+          type: array
+          items:
+            type: string
+            format: uuid
+    Job:
+      required:
+        - id
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the represented object (entity).
+          format: uuid
+        createdBy:
+          type: string
+          description: The id of the user that created this resource.
+          format: uuid
+          example: 4d250cc5-e583-4640-9874-b93d82c7a6cb
+        createdOn:
+          type: integer
+          description: >-
+            The timestamp (in UTC time standard) of the creation of this
+            resource.
+          format: int64
+          example: 1475503010320
+        lastModifiedBy:
+          type: string
+          description: The id of the user who modified this resource the last time.
+          format: uuid
+          example: a073ff90-e7bc-4b35-ba90-c4d475f642fe
+        lastModifiedOn:
+          type: integer
+          description: >-
+            The timestamp (in UTC time standard) of the last modification of
+            this resource.
+          format: int64
+          example: 1476703764163
+        system:
+          type: boolean
+          description: Whether this is a system resource or not.
+        resourceType:
+          type: string
+          description: >
+            The type of this resource, i.e. [Community, Asset, Domain,
+            Attribute, Relation, WorkflowInstance].
+          enum:
+            - View
+            - Asset
+            - Community
+            - Domain
+            - AssetType
+            - DomainType
+            - Status
+            - User
+            - ClassificationMatch
+            - UserGroup
+            - Attribute
+            - StringAttribute
+            - ScriptAttribute
+            - BooleanAttribute
+            - DateAttribute
+            - NumericAttribute
+            - SingleValueListAttribute
+            - MultiValueListAttribute
+            - Comment
+            - Attachment
+            - Responsibility
+            - Workflow
+            - Job
+            - Relation
+            - RelationType
+            - ComplexRelation
+            - ComplexRelationType
+            - ArticulationRule
+            - Assignment
+            - Scope
+            - RelationTrace
+            - ValidationRule
+            - DataQualityRule
+            - DataQualityMetric
+            - Address
+            - InstantMessagingAccount
+            - Email
+            - PhoneNumber
+            - Website
+            - Activity
+            - FormProperty
+            - WorkflowTask
+            - ActivityChange
+            - WorkflowInstance
+            - Role
+            - AttributeType
+            - BooleanAttributeType
+            - DateAttributeType
+            - DateTimeAttributeType
+            - MultiValueListAttributeType
+            - NumericAttributeType
+            - ScriptAttributeType
+            - SingleValueListAttributeType
+            - StringAttributeType
+            - ViewSharingRule
+            - ViewAssignmentRule
+            - JdbcDriverFile
+            - JdbcDriver
+            - JdbcIngestionProperties
+            - CsvIngestionProperties
+            - ExcelIngestionProperties
+            - ConnectionStringParameter
+            - AssignedCharacteristicType
+            - Notification
+            - Tag
+            - ComplexRelationLegType
+            - ComplexRelationAttributeType
+            - ComplexRelationLeg
+            - BaseDataType
+            - AdvancedDataType
+            - DiagramPicture
+            - DiagramPictureSharingRule
+            - DiagramPictureAssignmentRule
+            - Rating
+            - Classification
+            - PhysicalDataConnector
+            - Context
+        name:
+          type: string
+          description: The name of the resource.
+          example: Test name
+        type:
+          type: string
+          description: The type of the job.
+          example: IMPORT
+        userId:
+          type: string
+          description: The ID of the user that initiated this job.
+          format: uuid
+        progressPercentage:
+          type: number
+          description: The progress percentage of the job.
+          format: double
+          example: 50
+        startDate:
+          type: integer
+          description: The start date of the job.
+          format: int64
+          example: 1488016800
+        endDate:
+          type: integer
+          description: The end date of the job.
+          format: int64
+          example: 1488021800
+        state:
+          type: string
+          description: The state of the job.
+          example: COMPLETED
+          enum:
+            - WAITING
+            - RUNNING
+            - CANCELING
+            - COMPLETED
+            - CANCELED
+            - ERROR
+        message:
+          type: string
+          description: The message of the job.
+          example: Import finished in 12s.
+      description: >-
+        Represents a job. Job is a single atomic task that is to be performed
+        asynchronously.
+    MetadataSynchronizationRule:
+      type: object
+      properties:
+        include:
+          type: string
+          description: >
+            A comma-separated list of the names of the tables you want to
+            synchronize. You can use '*' as a wildcard.
+
+            If no value is defined, all the tables are included by default.
+          default: '*'
+          example: customers_*
+        exclude:
+          type: string
+          description: >
+            A comma-separated list of the names of the tables you do not want to
+            synchronize.
+
+            You can use this table rule to do the following:
+              1. Synchronize all tables in a schema except the ones defined in the Exclude field.
+              2. Synchronize only tables as defined in the Include field, with the exception of tables that are listed
+                 in the Exclude field.
+          default: ''
+          example: >-
+            customers_very_big_one_causing_troubles,
+            customers_another_one_I_dont_want_to_ingest
+        targetDomainId:
+          description: >
+            The ID of a target domain in which the assets are created. If no
+            domain is specified the assets are created
+
+            in the automatically created domain for that schema.
+          type: string
+          format: uuid
+        skipViews:
+          type: boolean
+          example: true
+          default: false
+          description: >
+            A property to exclude database views from the synchronization
+            process.
+
+            If true, no assets of the type Database View are created.
+        registerSourceTags:
+          type: boolean
+          example: true
+          description: >
+            A property to register source tags when it is supported by the
+            driver.
+    ChangeSchemaMetadataConfigurationRequest:
+      allOf:
+        - $ref: '#/components/schemas/AddSchemaMetadataConfigurationRequest'
+    SchemaMetadataConfigurations:
+      type: array
+      items:
+        $ref: '#/components/schemas/SchemaMetadataConfiguration'
+    AddSchemaMetadataConfigurationBatchRequest:
+      type: array
+      items:
+        $ref: '#/components/schemas/AddSchemaMetadataConfigurationRequest'
+    MetadataSynchronizationRules:
+      type: array
+      items:
+        $ref: '#/components/schemas/MetadataSynchronizationRule'
+    AddSchemaMetadataConfigurationRequest:
+      type: object
+      required:
+        - schemaConnectionId
+      properties:
+        schemaConnectionId:
+          type: string
+          format: uuid
+        synchronizationRules:
+          $ref: '#/components/schemas/MetadataSynchronizationRules'
+    SchemaMetadataConfiguration:
+      allOf:
+        - $ref: '#/components/schemas/AddSchemaMetadataConfigurationRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+    SchemaMetadataConfigurationPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/SchemaMetadataConfiguration'
+    ProfilingConfigurationPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/ProfilingConfiguration'
+    SchemaProfilingConfigurationPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/SchemaProfilingConfiguration'
+    StandardErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP response code
+        titleMessage:
+          type: string
+        helpMessage:
+          type: string
+        userMessage:
+          type: string
+        errorCode:
+          type: string
+    SchemaProfilingConfigurations:
+      type: array
+      items:
+        $ref: '#/components/schemas/SchemaProfilingConfiguration'
+    AddSchemaProfilingConfigurationBatchRequest:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/AddSchemaProfilingConfigurationRequest'
+    AddProfilingConfigurationRequest:
+      type: object
+      required:
+        - databaseId
+      properties:
+        databaseId:
+          type: string
+          format: uuid
+          description: The ID of the Database asset.
+        profilingType:
+          type: string
+          enum:
+            - full
+            - sample
+            - none
+          default: sample
+          description: >
+            - **full**: Select to profile and classify based on all synchronized
+            metadata.
+
+            - **sample**: Select to profile and classify based on a sample of
+            the synchronized metadata.
+              When you select Partial scan, you can define the maximum number of rows that you want to use for profiling and classification (as *sampleSize*).
+            By default, the maximum number of rows is 20000.
+        sampleSize:
+          $ref: '#/components/schemas/SampleSize'
+        runAfterMetadataSynchronization:
+          type: boolean
+          example: true
+          default: false
+          description: >
+            If set to *true*, it will automatically create a data profile and
+            classify columns every time
+
+            the metadata synchronization process of one or more schemas
+            finishes.
+
+
+            This may take a long time. You can also add a schedule to profile
+            and classify at regular intervals.
+        excludeTypes:
+          $ref: '#/components/schemas/ExcludeTypes'
+    ChangeProfilingConfigurationRequest:
+      type: object
+      properties:
+        profilingType:
+          type: string
+          enum:
+            - full
+            - sample
+            - none
+          description: >
+            - **full**: Select to profile and classify based on all synchronized
+            metadata.
+
+            - **sample**: Select to profile and classify based on a sample of
+            the synchronized metadata.
+              When you select Partial scan, you can define the maximum number of rows that you want to use for profiling and classification (as *sampleSize*).
+            By default, the maximum number of rows is 20000.
+        sampleSize:
+          type: integer
+          maximum: 1000000
+          description: >-
+            If *profilingType* is defined as *sample*, this attribute defines
+            how many rows are used for profiling. The minimum value is 100.
+        runAfterMetadataSynchronization:
+          type: boolean
+          example: true
+          description: >
+            If set to *true*, it will automatically create a data profile and
+            classify columns every time
+
+            the metadata synchronization process of one or more schemas
+            finishes.
+
+
+            This may take a long time. You can also add a schedule to profile
+            and classify at regular intervals.
+        excludeTypes:
+          $ref: '#/components/schemas/ExcludeTypes'
+    ProfilingConfiguration:
+      allOf:
+        - $ref: '#/components/schemas/AddProfilingConfigurationRequest'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              description: The ID of the profiling configuration.
+              format: uuid
+              readOnly: true
+    SampleSize:
+      type: integer
+      default: 20000
+      maximum: 1000000
+      description: >-
+        If *profilingType* is defined as *sample*, this attribute defines how
+        many rows are used for profiling. The minimum value is 100.
+    AddSchemaProfilingConfigurationRequest:
+      type: object
+      required:
+        - schemaConnectionId
+        - profilingRules
+      properties:
+        schemaConnectionId:
+          type: string
+          format: uuid
+          description: The ID of the schema connection.
+        profilingRules:
+          $ref: '#/components/schemas/SchemaProfilingRules'
+    SchemaProfilingRules:
+      type: array
+      maxItems: 1
+      items:
+        $ref: '#/components/schemas/SchemaProfilingRule'
+    SchemaProfilingRule:
+      type: object
+      required:
+        - profilingType
+      properties:
+        profilingType:
+          type: string
+          enum:
+            - full
+            - sample
+            - none
+          default: sample
+          description: >
+            - **full**: Select to profile and classify based on all synchronized
+            metadata.
+
+            - **sample**: Select to profile and classify based on a sample of
+            the synchronized metadata.
+              When you select Partial scan, you can define the maximum number of rows that you want to use for profiling and classification (as *sampleSize*).
+            By default, the maximum number of rows is 20000.
+        sampleSize:
+          $ref: '#/components/schemas/SampleSize'
+        include:
+          type: string
+          description: >
+            A comma-separated list of the table names you want to profile. You
+            can use `*` as a wildcard.
+
+            If not defined, all the tables are included by default.
+          default: '*'
+          example: customers_*
+        exclude:
+          type: string
+          description: "A comma-separated list of table names to be excluded during profiling. You can use `*` as a wildcard.\nIf not defined, no table will be excluded and all tables defined in `include` will be profiled. \nYou can use this table rule to:\n\t1. Profile all tables in a schema except the ones defined in the `exclude` field.\n\t2. Profile only tables as defined in the `include` field, with the exception of tables that are listed\n\t\t in the `exclude` field.\n"
+          default: ''
+          example: >-
+            customers_very_big_one_causing_troubles,
+            customers_another_one_I_dont_want_to_profile, temp_*
+        excludeTypes:
+          $ref: '#/components/schemas/ExcludeTypes'
+    ChangeSchemaProfilingConfigurationRequest:
+      allOf:
+        - $ref: '#/components/schemas/AddSchemaProfilingConfigurationRequest'
+    SchemaProfilingConfiguration:
+      allOf:
+        - $ref: '#/components/schemas/AddSchemaProfilingConfigurationRequest'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The ID of schema profiling configuration.
+              readOnly: true
+    ExcludeTypes:
+      type: string
+      description: |
+        A comma-separated list of table types to be excluded during profiling.
+      default: ''
+      example: 'VIEW, MATERIALIZED VIEW, INDEX'
+  responses:
+    InvalidRequest400:
+      description: The request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 400
+            titleMessage: Invalid Request
+            helpMessage: Please check the application logs for more information.
+            userMessage: The request is not valid.
+            errorCode: invalidRequest
+    InvalidRequest401:
+      description: The client is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 401
+            titleMessage: Unauthorized
+            helpMessage: Please check the application logs for more information.
+            userMessage: Failed to authenticate request through basic credentials
+            errorCode: authenticationFailed
+    InvalidRequest403:
+      description: The user lacks permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 403
+            titleMessage: Forbidden
+            helpMessage: Please check the application logs for more information.
+            userMessage: The user does not have the required permissions.
+            errorCode: authorizationFailed
+    InvalidRequest404:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 404
+            titleMessage: Not Found
+            helpMessage: Please check the application logs for more information.
+            userMessage: The resource could not be found
+            errorCode: Not found
+    DatabaseConnectionsSynchronizationStartedResponse:
+      description: >
+        The database connections synchronization job has started. The response
+        includes the location of the GET API that
+
+        you can use to monitor the job as a *Location* header.
+      headers:
+        Location:
+          description: >-
+            Reference to the Job Details GET API that can you can use to track
+            the progress of the job.
+          schema:
+            type: string
+            format: url
+            example: 'https://hostname/jobs/2ffbd52a-6324-4337-9176-49ab9c66f6c9'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Job'
+    SchemaConnectionsSynchronizationStartedResponse:
+      description: The schema connections synchronization job has started.
+      headers:
+        Location:
+          description: >-
+            Reference to the Job Details GET API that you can use to track the
+            progress of the job.
+          schema:
+            type: string
+            format: url
+            example: 'https://hostname/jobs/2ffbd52a-6324-4337-9176-49ab9c66f6c9'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Job'
+    DatabaseSynchronizationStartedResponse:
+      description: The database metadata synchronization job has started.
+      headers:
+        Location:
+          description: >-
+            Reference to the Job Details GET API that you can use to track the
+            progress of the job.
+          schema:
+            type: string
+            format: url
+            example: 'https://hostname/jobs/2ffbd52a-6324-4337-9176-49ab9c66f6c9'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Job'
+    DatabaseProfilingStartedResponse:
+      description: The profiling job has started.
+      headers:
+        Location:
+          description: >-
+            Reference to the Job API that you can use to track the progress of
+            the job.
+          schema:
+            type: string
+            format: url
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Job'
+    SchemaConnectionResponse:
+      description: Represents a schema connection.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SchemaConnection'
+    DatabaseConnectionResponse:
+      description: Represents a database connection.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DatabaseConnection'
+  securitySchemes:
+    basicAuth:
+      description: The APIs require Basic HTTP authentication.
+      type: http
+      scheme: basic

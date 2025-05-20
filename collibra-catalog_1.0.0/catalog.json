@@ -1,0 +1,634 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Collibra Catalog API",
+    "description": "<p>The Catalog API offers functionality related to the catalog product.<br/> It is mainly focused on facilitating the ingestion of information into Catalog. The API enables users to more easily connect Catalog to sources that are not necessarily natively supported in the product. </p>",
+    "version": "1.0",
+    "x-audience": "public"
+  },
+  "servers": [
+    {
+      "url": "/rest/catalog/1.0",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "JobServer Instance configuration",
+      "description": "Query JobServer instance configurations"
+    },
+    {
+      "name": "JDBC Schema Ingestion",
+      "description": "Create and refresh schemas from JDBC data sources"
+    }
+  ],
+  "paths": {
+    "/configuration/jobServerInstance": {
+      "get": {
+        "tags": [
+          "JobServer Instance configuration"
+        ],
+        "summary": "Retrieve existing JobServer instance configurations",
+        "description": "Retrieve existing JobServer instance configurations. <br />This operation is deprecated and it will be removed the next major release",
+        "operationId": "getAvailableJobServerInstances",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The first result to retrieve. If not set (offset = <code>0</code>), results will be retrieved starting from row <code>0</code>.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results to retrieve. If not set (limit = <code>0</code>), the default limit will be used. The maximum allowed limit is 1000.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "countLimit",
+            "in": "query",
+            "description": "Allows to limit the number of elements that will be counted. -1 will count everything and 0 will cause the count to be skipped",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of available configured JobServer instances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobServerInstanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request is not valid."
+          },
+          "401": {
+            "description": "User lacks permission."
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/schemas/jdbc": {
+      "post": {
+        "tags": [
+          "JDBC Schema Ingestion"
+        ],
+        "summary": "Create a JDBC schema ingestion",
+        "description": "Create a schema from a JDBC data source. <br />This operation is deprecated and it will be removed the next major release",
+        "operationId": "addSchemaFromJdbc",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSchemaFromJdbcRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The Job which represents the ongoing schema ingestion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request is not valid."
+          },
+          "401": {
+            "description": "User lacks permission."
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/schemas/jdbc/{assetId}": {
+      "post": {
+        "tags": [
+          "JDBC Schema Ingestion"
+        ],
+        "summary": "Refresh an existing JDBC schema ingestion",
+        "description": "Refresh a schema from a JDBC data source. <br />This operation is deprecated and it will be removed the next major release",
+        "operationId": "refreshJdbcSchema",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshJdbcSchemaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The Job which represents the ongoing schema refresh",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request request is not valid."
+          },
+          "401": {
+            "description": "User lacks permission."
+          }
+        },
+        "deprecated": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JobServerInstance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The JobServer id",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "The JobServer name"
+          },
+          "address": {
+            "type": "string",
+            "description": "The JobServer address"
+          }
+        },
+        "description": "Represents a JobServer instance from DGC Configuration"
+      },
+      "JobServerInstanceResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "The total number of results.",
+            "format": "int64",
+            "example": 1000
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The offset for the results.",
+            "format": "int64",
+            "example": 10
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of results to be returned.",
+            "format": "int64",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "The list of results.",
+            "items": {
+              "$ref": "#/components/schemas/JobServerInstance"
+            }
+          }
+        }
+      },
+      "PagedResponseJobServerInstance": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "The total number of results.",
+            "format": "int64",
+            "example": 1000
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The offset for the results.",
+            "format": "int64",
+            "example": 10
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The maximum number of results to be returned.",
+            "format": "int64",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "The list of results.",
+            "items": {
+              "$ref": "#/components/schemas/JobServerInstance"
+            }
+          }
+        },
+        "description": "Response containing the paged information."
+      },
+      "Job": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the represented object (entity).",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The id of the user that created this resource.",
+            "format": "uuid",
+            "example": "4d250cc5-e583-4640-9874-b93d82c7a6cb"
+          },
+          "createdOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the creation of this resource.",
+            "format": "int64",
+            "example": 1475503010320
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "The id of the user who modified this resource the last time.",
+            "format": "uuid",
+            "example": "a073ff90-e7bc-4b35-ba90-c4d475f642fe"
+          },
+          "lastModifiedOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the last modification of this resource.",
+            "format": "int64",
+            "example": 1476703764163
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Whether this is a system resource or not."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of this resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the resource.",
+            "example": "Test name"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the job.",
+            "example": "IMPORT"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user that initiated this job.",
+            "format": "uuid"
+          },
+          "visibility": {
+            "type": "integer",
+            "description": "The visibility of the job.",
+            "format": "int32"
+          },
+          "progressPercentage": {
+            "type": "number",
+            "description": "The progress percentage of the job.",
+            "format": "double",
+            "example": 50
+          },
+          "cancelable": {
+            "type": "boolean",
+            "description": "Whether this job is cancelable or not. If set to false it will not be possible to cancel the job once submitted."
+          },
+          "startDate": {
+            "type": "integer",
+            "description": "The start date of the job.",
+            "format": "int64",
+            "example": 1488016800
+          },
+          "endDate": {
+            "type": "integer",
+            "description": "The end date of the job.",
+            "format": "int64",
+            "example": 1488021800
+          },
+          "state": {
+            "type": "string",
+            "description": "The state of the job.",
+            "example": "COMPLETED",
+            "enum": [
+              "WAITING",
+              "RUNNING",
+              "CANCELING",
+              "COMPLETED",
+              "CANCELED",
+              "ERROR"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "description": "The result of the job.",
+            "example": "SUCCESS",
+            "enum": [
+              "NOT_SET",
+              "SUCCESS",
+              "COMPLETED_WITH_ERROR",
+              "FAILURE",
+              "ABORTED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "The message of the job.",
+            "example": "Import finished in 12s."
+          }
+        },
+        "description": "Represents a job. Job is a single atomic task that is to be performed asynchronously"
+      },
+      "AddSchemaFromJdbcRequest": {
+        "required": [
+          "jdbcDriverId",
+          "ownerId",
+          "properties",
+          "schemaName",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "schemaName": {
+            "type": "string",
+            "description": "The schema name"
+          },
+          "jdbcDriverId": {
+            "type": "string",
+            "description": "The UUID of the JdbcDriver to use to connect to a JDBC source for ingestion.",
+            "format": "uuid"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "The properties that will be passed to the JDBC driver to connect to the source."
+            },
+            "description": "The properties that will be passed to the JDBC driver to connect to the source."
+          },
+          "user": {
+            "type": "string",
+            "description": "The username for the connection. If the user is not requested, specify an empty String"
+          },
+          "password": {
+            "type": "array",
+            "description": "The password for the connection. It can be specified as array of char (more secure) or as a String",
+            "items": {
+              "type": "string",
+              "description": "The password for the connection. It can be specified as array of char (more secure) or as a String"
+            }
+          },
+          "jdbcConnectionString": {
+            "type": "string",
+            "description": "The connection string that will be used instead of the one from the JdbcDriver."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the schema to be added."
+          },
+          "ownerId": {
+            "type": "string",
+            "description": "The id of the user who will be assigned as the owner of the produced domain.",
+            "format": "uuid"
+          },
+          "storeCredentials": {
+            "type": "boolean",
+            "description": "Specify if the credentials should be stored into the database."
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "The cron expression to enable the automatic refresh. If not set, it will delete the cron job if one was present.<br />It requires storeCredential to be set to true.<br />For the syntax, see http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html"
+          },
+          "cronTimeZone": {
+            "type": "string",
+            "description": "The cron time zone. If a cron expression is set, a time zone is mandatory."
+          },
+          "extractDataSample": {
+            "type": "boolean",
+            "description": "Specify if sampleData should be extracted from the database."
+          },
+          "executeProfiling": {
+            "type": "boolean",
+            "description": "Specify if profiling should be executed."
+          },
+          "detectAdvancedDataTypes": {
+            "type": "boolean",
+            "description": "Specify if advanced data types should be detected."
+          },
+          "tablesToSkip": {
+            "type": "array",
+            "description": "The list table names that shouldn't be ingested. The names can contain * wildcards toskip multiple tables with similar names.",
+            "items": {
+              "type": "string",
+              "description": "The list table names that shouldn't be ingested. The names can contain * wildcards toskip multiple tables with similar names."
+            }
+          },
+          "jobServer": {
+            "type": "string",
+            "description": "Specify the jobserver id where to submit the ingestion."
+          }
+        },
+        "description": "A request for ingesting a JDBC source."
+      },
+      "RefreshJdbcSchemaRequest": {
+        "required": [
+          "jdbcDriverId",
+          "properties",
+          "schemaId",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "schemaId": {
+            "type": "string",
+            "description": "The schema ID of the schema asset to be refreshed",
+            "format": "uuid"
+          },
+          "jdbcDriverId": {
+            "type": "string",
+            "description": "The UUID of the JdbcDriver to use to connect to a JDBC source for ingestion.",
+            "format": "uuid"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "The properties that will be passed to the JDBC driver to connect to the source."
+            },
+            "description": "The properties that will be passed to the JDBC driver to connect to the source."
+          },
+          "user": {
+            "type": "string",
+            "description": "The username for the connection. If the user is not requested, specify an empty String"
+          },
+          "password": {
+            "type": "array",
+            "description": "The password for the connection. It can be specified as array of char (more secure) or as a String",
+            "items": {
+              "type": "string",
+              "description": "The password for the connection. It can be specified as array of char (more secure) or as a String"
+            }
+          },
+          "jdbcConnectionString": {
+            "type": "string",
+            "description": "The connection string that will be used instead of the one from the JdbcDriver."
+          },
+          "storeCredentials": {
+            "type": "boolean",
+            "description": "Specify if the credentials should be stored into the database."
+          },
+          "overridePassword": {
+            "type": "boolean",
+            "description": "If true, the password will be used to connect instead of the previously saved one."
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "The cron expression to enable the automatic refresh. If not set, it will delete the cron job if one was present <br />It requires storeCredential to be set to true.<br />For the syntax, see http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html"
+          },
+          "cronTimeZone": {
+            "type": "string",
+            "description": "The cron time zone. If a cron expression is set, a time zone is mandatory."
+          },
+          "extractDataSample": {
+            "type": "boolean",
+            "description": "Specify if sampleData should be extracted from the database."
+          },
+          "executeProfiling": {
+            "type": "boolean",
+            "description": "Specify if profiling should be executed."
+          },
+          "detectAdvancedDataTypes": {
+            "type": "boolean",
+            "description": "Specify if advanced data types should be detected."
+          },
+          "tablesToSkip": {
+            "type": "array",
+            "description": "The list table names that shouldn't be ingested. The names can contain * wildcards toskip multiple tables with similar names.",
+            "items": {
+              "type": "string",
+              "description": "The list table names that shouldn't be ingested. The names can contain * wildcards toskip multiple tables with similar names."
+            }
+          },
+          "jobServer": {
+            "type": "string",
+            "description": "Specify the jobserver id where to submit the ingestion."
+          }
+        },
+        "description": "A request for ingesting a JDBC source."
+      }
+    }
+  }
+}

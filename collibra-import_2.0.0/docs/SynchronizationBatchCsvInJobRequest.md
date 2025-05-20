@@ -1,0 +1,25 @@
+# SynchronizationBatchCsvInJobRequest
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**send_notification** | **bool** | Whether job status notification should be sent. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;. | [optional] 
+**batch_size** | **int** | &lt;i&gt;The batchSize parameter is now deprecated and is ignored during command execution.&lt;/i&gt; | [optional] [default to 1000]
+**simulation** | **bool** | Whether the import should be triggered as a simulation. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;.&lt;p&gt;If &lt;code&gt;true&lt;/code&gt;, the result of the import simulation will be available at the end of the job but no change will be applied to the DGC. | [optional] 
+**save_result** | **bool** | Whether the import Result should be persisted or forgotten. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;.&lt;p&gt;If &lt;code&gt;true&lt;/code&gt;, the result of the import simulation will be available at the end of the job but no change will be applied to the DGC.&lt;p&gt;&lt;b&gt;DEPRECATED:&lt;/b&gt;This parameter is deprecated and will be removed in the future.&lt;/b&gt;. | [optional] 
+**synchronization_id** | **str** |  | 
+**file_id** | **str** | The &lt;code&gt;id&lt;/code&gt; of uploaded file.&lt;p&gt;&lt;b&gt;NOTE:&lt;/b&gt; if this field is used, &lt;code&gt;file&lt;/code&gt; should not be set. | [optional] 
+**file** | **str** | The file to upload. If set, then also &lt;code&gt;fileName&lt;/code&gt; should be provided.&lt;p&gt;&lt;b&gt;NOTE:&lt;/b&gt; if this field is used, &lt;code&gt;fileId&lt;/code&gt; should not be set. | [optional] 
+**file_name** | **str** | The name of the file to upload. If set, then also &lt;code&gt;file&lt;/code&gt; should be provided.&lt;p&gt;&lt;b&gt;NOTE:&lt;/b&gt; if this field is used, &lt;code&gt;fileId&lt;/code&gt; should not be set. | [optional] 
+**delete_file** | **bool** | Whether the file should be deleted after the synchronization job is finished, regardless of the result. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;.&lt;p&gt;&lt;b&gt;NOTE:&lt;/b&gt; if the file corresponds to an attachment, the attachment will be deleted. | [optional] 
+**continue_on_error** | **bool** | Whether the import should continue if some of the import commands are invalid or failed to execute. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;.&lt;p&gt;If &lt;code&gt;true&lt;/code&gt;, the valid commands are still committed to the database, which can lead to partial results being stored. | [optional] 
+**separator** | **str** | The delimiter character used to separate entries. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;&#x27;;&#x27;&lt;/code&gt;. | 
+**quote** | **str** | The delimiter character used for quoted entries. &lt;b&gt;The default value&lt;/b&gt;  is &lt;code&gt;&#x27;\&quot;&#x27;&lt;/code&gt;. | 
+**escape** | **str** | The delimiter character used to escape separator or quote character. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;&#x27;\\\\&#x27;&lt;/code&gt;. | 
+**strict_quotes** | **bool** | Whether the characters outside quotes should be ignored. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;. | [optional] 
+**ignore_leading_whitespace** | **bool** | Whether whitespace characters before quotes should be ignored. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;. | [optional] 
+**header_row** | **bool** | Whether the first row of the synchronized CSV file is the header. &lt;b&gt;The default value&lt;/b&gt; is &lt;code&gt;false&lt;/code&gt;. | [optional] 
+**template** | **str** | The template that should be used for parsing and synchronizing the contents of the CSV file.  &lt;br/&gt;&lt;p&gt;There is one placeholder currently supported:&lt;ul&gt;     &lt;li&gt;&lt;b&gt;${x}&lt;/b&gt; - refers to the n-th column in the CSV file, e.g. ${1}, ${2}, ...)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Example of a correct JSON template:&lt;/p&gt; &lt;pre&gt; [   {     \&quot;resourceType\&quot;: \&quot;Asset\&quot;,     \&quot;identifier\&quot;: {       \&quot;name\&quot;: \&quot;${1}\&quot;,       \&quot;domain\&quot;: {         \&quot;name\&quot;: \&quot;${2}\&quot;,         \&quot;community\&quot;: {           \&quot;name\&quot;: \&quot;Some Community\&quot;         }       }     },     \&quot;attributes\&quot; : {       \&quot;00000000-0000-0000-0000-000000003115\&quot; : [ {         \&quot;value\&quot; : \&quot;${3}\&quot;        } ],       \&quot;00000000-0000-0000-0000-000000000222\&quot; : [ {         \&quot;value\&quot; : \&quot;${4}\&quot;       } ]     }   } ] &lt;/pre&gt; | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+

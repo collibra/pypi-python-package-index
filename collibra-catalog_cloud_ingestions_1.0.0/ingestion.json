@@ -1,0 +1,1938 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Collibra Catalog Cloud Ingestions API",
+    "description": "<p>The Catalog Cloud Ingestions API offers functionality related to the catalog product.<br/> It is mainly focused on facilitating the ingestion of information into Catalog. The API enables users to more easily connect Catalog to sources that are not necessarily natively supported in the product. </p>",
+    "version": "1.0",
+    "x-audience": "public"
+  },
+  "servers": [
+    {
+      "url": "/rest/catalog/1.0",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "S3",
+      "description": "AWS S3 synchronization operations"
+    },
+    {
+      "name": "GCS",
+      "description": "Google Cloud Storage synchronization operations"
+    },
+    {
+      "name": "ADLS",
+      "description": "Azure Data Lake Storage synchronization operations"
+    },
+    {
+      "name": "TABLEAU",
+      "description": "Tableau Server synchronization operations"
+    },
+    {
+      "name": "POWERBI",
+      "description": "PowerBi synchronization operations"
+    },
+    {
+      "name": "GENERIC",
+      "description": "Generic integration operations"
+    }
+  ],
+  "paths": {
+    "/filesystem/{fileSystemType}/{assetId}/capability": {
+      "get": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU"
+        ],
+        "summary": "Retrieve a capability",
+        "description": "Returns the capability of the file system with the specified ID.",
+        "operationId": "getAttachedCapabilityId",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Id of attached Edge capability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No capability attached"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU"
+        ],
+        "summary": "Add a capability",
+        "description": "Adds a capability to the file system with the specified ID.",
+        "operationId": "attachCapability",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Capability attached"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU"
+        ],
+        "summary": "Remove a capability",
+        "description": "Removes a capability from the file system with the specified ID.",
+        "operationId": "detachCapability",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Capability detached"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem": {
+      "get": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU"
+        ],
+        "summary": "Find filesystem assets that have the given Edge capability attached",
+        "operationId": "findFilesystemAssetIdsForCapability",
+        "parameters": [
+          {
+            "name": "capabilityId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filesystem asset ids",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem/{fileSystemType}/{assetId}/crawlers": {
+      "get": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "List crawlers",
+        "description": "Returns a list of crawlers that are defined for the file system with the specified ID.",
+        "operationId": "getCrawlers",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Crawler"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Update a crawler",
+        "description": "Updates a crawler definition for the file system with the specified ID.",
+        "operationId": "updateCrawler",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCrawlerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Crawler"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Add a crawler",
+        "description": "Adds a new crawler definition to the file system with the specified ID.",
+        "operationId": "addCrawler",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddCrawlerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Crawler"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Delete a crawler",
+        "description": "Deletes a crawler definition from the file system with the specified ID.",
+        "operationId": "deleteCrawler",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveCrawlerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Crawler deleted"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem/{fileSystemType}/{assetId}/schedule": {
+      "get": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Retrieve a synchronization schedule",
+        "description": "Returns the synchronization schedule for the file system with the specified ID.",
+        "operationId": "getSchedule",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "cloud synchronization schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Update a synchronization schedule",
+        "description": "Updates a synchronization schedule for the file system with the specified ID.",
+        "operationId": "updateSchedule",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeFileSystemScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "S3 synchronization schedule updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "New S3 synchronization schedule created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Add a synchronization schedule",
+        "description": "Adds a synchronization schedule for the file system with the specified ID.",
+        "operationId": "addSchedule",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFileSystemScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cloud synchronization schedule added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS"
+        ],
+        "summary": "Delete a synchronization schedule",
+        "description": "Deletes a synchronization schedule for the file system with the specified ID.",
+        "operationId": "deleteSchedule",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cloud synchronization schedule deleted"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem/{fileSystemType}/{assetId}/synchronize": {
+      "post": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU",
+          "POWERBI"
+        ],
+        "summary": "Synchronize a file system",
+        "description": "Starts an asynchronous Edge synchronization job for the file system or capability with the specified ID.",
+        "operationId": "synchronizeFileSystem",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Cloud synchronization job successfully started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "S3",
+          "GCS",
+          "ADLS",
+          "TABLEAU",
+          "POWERBI"
+        ],
+        "summary": "Schedule canceling of cloud synchronization",
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "fileSystemType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "S3",
+                "GCS",
+                "ADLS",
+                "TABLEAU",
+                "POWERBI",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No job to cancel"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/genericIntegration/{ingestibleId}/configuration": {
+      "get": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Retrieve a generic configuration",
+        "description": "Returns the generic configuration for the integration instance with the specified ID.",
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generic configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericConfiguration"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Reading configuration is now allowed."
+          },
+          "404": {
+            "description": "No configuration is found by specified ingestible id."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Create or update a generic configuration",
+        "description": "Creates or updates a generic configuration for the integration instance with the specified ID.",
+        "operationId": "saveConfig",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Generic configuration to save.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveGenericConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Generic configuration is created or updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericConfiguration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body is invalid e.g. is not a JSON"
+          },
+          "403": {
+            "description": "Saving a configuration to the given instance is not allowed"
+          },
+          "404": {
+            "description": "No integration instance is found by specified ingestible id."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Delete a generic configuration",
+        "description": "Deletes a generic configuration from the integration instance with the specified ID.",
+        "operationId": "deleteConfig",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Generic configuration is deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericConfiguration"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Deleting a configuration is not allowed"
+          },
+          "404": {
+            "description": "No configuration is found by specified ingestible id."
+          }
+        }
+      }
+    },
+    "/genericIntegration/{ingestibleId}/configuration/schema": {
+      "get": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Retrieve data schema as part of generic configuration",
+        "description": "Returns data schema for the integration instance with the specified ID.",
+        "operationId": "getSchema",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No data schema is found by specified ingestible id."
+          }
+        }
+      }
+    },
+    "/genericIntegration/{ingestibleId}/schedule": {
+      "get": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Retrieve a schedule",
+        "description": "Returns the schedule for the generic Edge capability with the specified ID.",
+        "operationId": "getGenericSchedule",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Capability synchronization schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Update a schedule",
+        "description": "Updates the schedule for the generic Edge capability with the specified ID.",
+        "operationId": "updateGenericSchedule",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeGenericScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synchronization schedule updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "New Synchronization schedule created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Add a schedule",
+        "description": "Adds a schedule for the generic Edge capability with the specified ID.",
+        "operationId": "addGenericSchedule",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGenericScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cloud synchronization schedule added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Delete a schedule",
+        "description": "Deletes the schedule from the generic Edge capability with the specified ID.",
+        "operationId": "deleteGenericSchedule",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Capability synchronization schedule deleted"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/genericIntegration/{ingestibleId}/cancel": {
+      "delete": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Cancel a synchronization",
+        "description": "Cancel the synchronization of the generic Edge capability with the specified ID.",
+        "operationId": "cancelCapabilityJob",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "No job to cancel"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/genericIntegration/{ingestibleId}/run": {
+      "post": {
+        "tags": [
+          "GENERIC"
+        ],
+        "summary": "Starts capability on Edge.",
+        "description": "Starts an Edge based capability job",
+        "operationId": "startCapabilityJob",
+        "parameters": [
+          {
+            "name": "ingestibleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Cloud synchronization job successfully started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem/s3/{assetId}/crawlers/{crawlerId}": {
+      "get": {
+        "tags": [
+          "S3"
+        ],
+        "summary": "Get the custom classifiers.",
+        "description": "Get the custom classifiers for S3 Glue crawler.",
+        "operationId": "getCrawlerCustomClassifiers",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "crawlerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content of custom classifiers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "S3"
+        ],
+        "summary": "Set the custom classifiers.",
+        "description": "Set the custom classifiers for S3 Glue crawler.",
+        "operationId": "changeCrawlerCustomClassifiers",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "crawlerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCrawlerCustomClassifiersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Custom classifiers has been successfully set"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/filesystem/s3/{assetId}/synchronize/jobserver": {
+      "post": {
+        "tags": [
+          "S3"
+        ],
+        "summary": "Asynchronously synchronizes an S3 File System.",
+        "description": "Starts a Jobserver based synchronization job for the give S3 File System.",
+        "operationId": "synchronizeS3FileSystem",
+        "parameters": [
+          {
+            "name": "assetId",
+            "in": "path",
+            "description": "S3 File System identifier",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "S3 synchronization job successfully started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Other synchronization for this s3FileSystemId is currently active"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Crawler": {
+        "type": "object",
+        "properties": {
+          "crawlerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "includePaths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrawlerIncludePath"
+            }
+          },
+          "fileSystemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customClassifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tableLevel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targets": {
+            "type": "string"
+          }
+        }
+      },
+      "CrawlerIncludePath": {
+        "required": [
+          "excludePatterns",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "excludePatterns": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AddCrawlerRequest": {
+        "required": [
+          "assetTypeId",
+          "domainId",
+          "fileSystemAssetId",
+          "includePaths",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 2147483647,
+            "minLength": 1,
+            "type": "string"
+          },
+          "includePaths": {
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrawlerIncludePathRequest"
+            }
+          },
+          "fileSystemAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customClassifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tableLevel": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "targets": {
+            "type": "string"
+          }
+        }
+      },
+      "CrawlerIncludePathRequest": {
+        "required": [
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "excludePatterns": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RemoveCrawlerRequest": {
+        "required": [
+          "assetTypeId",
+          "crawlerId",
+          "fileSystemAssetId"
+        ],
+        "type": "object",
+        "properties": {
+          "crawlerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileSystemAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetTypeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "UpdateCrawlerRequest": {
+        "required": [
+          "assetTypeId",
+          "crawlerId",
+          "domainId",
+          "includePaths",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 2147483647,
+            "minLength": 1,
+            "type": "string"
+          },
+          "includePaths": {
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrawlerIncludePathRequest"
+            }
+          },
+          "crawlerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customClassifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tableLevel": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "targets": {
+            "type": "string"
+          }
+        }
+      },
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "cronTimeZone": {
+            "type": "string"
+          },
+          "lastRunTimeStamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextRunDateLongValue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cronJson": {
+            "type": "string"
+          }
+        }
+      },
+      "AddFileSystemScheduleRequest": {
+        "required": [
+          "cronExpression",
+          "cronTimeZone",
+          "fileSystemAssetId"
+        ],
+        "type": "object",
+        "properties": {
+          "fileSystemAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "cronTimeZone": {
+            "type": "string"
+          },
+          "cronJson": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeFileSystemScheduleRequest": {
+        "required": [
+          "cronExpression",
+          "cronTimeZone",
+          "fileSystemAssetId"
+        ],
+        "type": "object",
+        "properties": {
+          "fileSystemAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cronExpression": {
+            "type": "string"
+          },
+          "cronTimeZone": {
+            "type": "string"
+          },
+          "cronJson": {
+            "type": "string"
+          }
+        }
+      },
+      "Job": {
+        "required": [
+          "id",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the represented object (entity).",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The id of the user that created this resource.",
+            "format": "uuid",
+            "example": "4d250cc5-e583-4640-9874-b93d82c7a6cb"
+          },
+          "createdOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the creation of this resource.",
+            "format": "int64",
+            "example": 1475503010320
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "The id of the user who modified this resource the last time.",
+            "format": "uuid",
+            "example": "a073ff90-e7bc-4b35-ba90-c4d475f642fe"
+          },
+          "lastModifiedOn": {
+            "type": "integer",
+            "description": "The timestamp (in UTC time standard) of the last modification of this resource.",
+            "format": "int64",
+            "example": 1476703764163
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Whether this is a system resource or not."
+          },
+          "resourceType": {
+            "type": "string",
+            "description": "The type of this resource, i.e. [Community, Asset, Domain, Attribute, Relation, WorkflowInstance].",
+            "enum": [
+              "View",
+              "Asset",
+              "Community",
+              "Domain",
+              "AssetType",
+              "DomainType",
+              "Status",
+              "User",
+              "ClassificationMatch",
+              "UserGroup",
+              "Attribute",
+              "StringAttribute",
+              "ScriptAttribute",
+              "BooleanAttribute",
+              "DateAttribute",
+              "NumericAttribute",
+              "SingleValueListAttribute",
+              "MultiValueListAttribute",
+              "Comment",
+              "Attachment",
+              "Responsibility",
+              "Workflow",
+              "Job",
+              "Relation",
+              "RelationType",
+              "ComplexRelation",
+              "ComplexRelationType",
+              "ArticulationRule",
+              "Assignment",
+              "Scope",
+              "RelationTrace",
+              "ValidationRule",
+              "DataQualityRule",
+              "DataQualityMetric",
+              "Address",
+              "InstantMessagingAccount",
+              "Email",
+              "PhoneNumber",
+              "Website",
+              "Activity",
+              "FormProperty",
+              "WorkflowTask",
+              "ActivityChange",
+              "WorkflowInstance",
+              "Role",
+              "AttributeType",
+              "BooleanAttributeType",
+              "DateAttributeType",
+              "DateTimeAttributeType",
+              "MultiValueListAttributeType",
+              "NumericAttributeType",
+              "ScriptAttributeType",
+              "SingleValueListAttributeType",
+              "StringAttributeType",
+              "ViewSharingRule",
+              "ViewAssignmentRule",
+              "JdbcDriverFile",
+              "JdbcDriver",
+              "JdbcIngestionProperties",
+              "CsvIngestionProperties",
+              "ExcelIngestionProperties",
+              "ConnectionStringParameter",
+              "AssignedCharacteristicType",
+              "Notification",
+              "Tag",
+              "ComplexRelationLegType",
+              "ComplexRelationAttributeType",
+              "ComplexRelationLeg",
+              "BaseDataType",
+              "AdvancedDataType",
+              "DiagramPicture",
+              "DiagramPictureSharingRule",
+              "DiagramPictureAssignmentRule",
+              "Rating",
+              "Classification",
+              "PhysicalDataConnector",
+              "Context"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the resource.",
+            "example": "Test name"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the job.",
+            "example": "IMPORT"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user that initiated this job.",
+            "format": "uuid"
+          },
+          "visibility": {
+            "type": "integer",
+            "description": "The visibility of the job.",
+            "format": "int32"
+          },
+          "progressPercentage": {
+            "type": "number",
+            "description": "The progress percentage of the job.",
+            "format": "double",
+            "example": 50
+          },
+          "cancelable": {
+            "type": "boolean",
+            "description": "Whether this job is cancelable or not. If set to false it will not be possible to cancel the job once submitted."
+          },
+          "startDate": {
+            "type": "integer",
+            "description": "The start date of the job.",
+            "format": "int64",
+            "example": 1488016800
+          },
+          "endDate": {
+            "type": "integer",
+            "description": "The end date of the job.",
+            "format": "int64",
+            "example": 1488021800
+          },
+          "state": {
+            "type": "string",
+            "description": "The state of the job.",
+            "example": "COMPLETED",
+            "enum": [
+              "WAITING",
+              "RUNNING",
+              "CANCELING",
+              "COMPLETED",
+              "CANCELED",
+              "ERROR"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "description": "The result of the job.",
+            "example": "SUCCESS",
+            "enum": [
+              "NOT_SET",
+              "SUCCESS",
+              "COMPLETED_WITH_ERROR",
+              "FAILURE",
+              "ABORTED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "The message of the job.",
+            "example": "Import finished in 12s."
+          }
+        },
+        "description": "Represents a job. Job is a single atomic task that is to be performed asynchronously"
+      },
+      "GenericConfiguration": {
+        "required": [
+          "ingestibleId",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "ingestibleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "SaveGenericConfigRequest": {
+        "required": [
+          "configuration"
+        ],
+        "type": "object",
+        "properties": {
+          "configuration": {
+            "type": "string"
+          }
+        }
+      },
+      "AddGenericScheduleRequest": {
+        "required": [
+          "cronExpression",
+          "cronTimeZone"
+        ],
+        "type": "object",
+        "properties": {
+          "cronExpression": {
+            "type": "string"
+          },
+          "cronTimeZone": {
+            "type": "string"
+          },
+          "cronJson": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeGenericScheduleRequest": {
+        "required": [
+          "cronExpression",
+          "cronTimeZone"
+        ],
+        "type": "object",
+        "properties": {
+          "cronExpression": {
+            "type": "string"
+          },
+          "cronTimeZone": {
+            "type": "string"
+          },
+          "cronJson": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCrawlerCustomClassifiersRequest": {
+        "required": [
+          "crawlerId",
+          "customClassifierNames"
+        ],
+        "type": "object",
+        "properties": {
+          "crawlerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customClassifierNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}
