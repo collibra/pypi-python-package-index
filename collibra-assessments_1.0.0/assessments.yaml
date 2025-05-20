@@ -1,0 +1,1153 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  x-audience: public
+  title: Collibra Assessments API
+  description: >-
+    This API allows you to interact with the Assessments application in a
+    programmatic way and perform actions such as retrieving data from conducted
+    assessments or triggering new assessments.
+servers:
+  - url: /rest/assessments/v1
+tags:
+  - name: Assessments
+    description: Take actions on assessments.
+  - name: Templates
+    description: Retrieve templates data.
+paths:
+  /assessments:
+    get:
+      tags:
+        - Assessments
+      summary: List assessments
+      description: >-
+        Returns a list of assessments that you created; and the assessments that
+        you are permitted to view. The assessments are sorted by
+        `lastModifiedOn` in descending order, with the most recent first.
+      operationId: listAssessments
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            The name of the assessment. 
+
+
+            The value is case-insensitive and it returns results that contain
+            this value.
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            The status of the assessment. 
+
+
+            Possible values are: `DRAFT`, `SUBMITTED`, `COMPLETED` or
+            `OBSOLETE`. The value is case-insensitive. An invalid value results
+            in an error response.
+        - in: query
+          name: lastModifiedFrom
+          schema:
+            type: string
+            format: date-time
+          description: >-
+            The date and time that defines the start of the period when the
+            assessment was last updated, including this timestamp.
+        - in: query
+          name: lastModifiedUntil
+          schema:
+            type: string
+            format: date-time
+          description: >-
+            The date and time that defines the end of the period when the
+            assessment was last updated, excluding this timestamp.
+        - in: query
+          name: templateId
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the template.
+        - in: query
+          name: templateVersion
+          schema:
+            type: string
+          description: >
+            The version of the template. 
+
+
+            Use `LATEST` to retrieve assessments that are on the latest version
+            of a particular `templateId`. For other values, it returns results
+            that have an exact match.
+        - in: query
+          name: assetId
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the asset the assessment relates to.
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListAssessments200'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/assessments/{id}':
+    get:
+      tags:
+        - Assessments
+      summary: Retrieve an assessment by ID
+      description: Returns information about the assessment with the specified ID.
+      operationId: getAssessment
+      parameters:
+        - in: path
+          description: The ID of the assessment.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAssessment200'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/assessments/byAssessmentReview/{id}':
+    get:
+      tags:
+        - Assessments
+      summary: Retrieve an assessment by assessment review ID
+      description: >-
+        Returns information about the assessment with the specified assessment
+        review asset ID.
+      operationId: getAssessmentByAssessmentReview
+      parameters:
+        - in: path
+          description: The ID of the assessment review asset.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAssessment200'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /assessments/conduct:
+    post:
+      tags:
+        - Assessments
+      summary: Conduct an assessment
+      description: Starts conducting an assessment by creating it in `DRAFT` status.
+      operationId: conductAssessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConductAssessmentRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/PostConductAssessment201'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /templates:
+    get:
+      tags:
+        - Templates
+      summary: List templates
+      description: >-
+        Returns a list of all available templates. The templates are sorted by
+        `name` in alphabetical order.
+      operationId: listTemplates
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            The name of the template. 
+
+
+            The value is case-insensitive and it returns results that contain
+            this value.
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            The status of the template. 
+
+
+            Possible values are: `DRAFT`, `PUBLISHED` or `OBSOLETE`. The value
+            is case-insensitive. An invalid value results in an error response.
+        - in: query
+          name: assetTypeId
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the asset type.
+        - in: query
+          name: latestVersionOnly
+          schema:
+            type: boolean
+          description: >
+            Whether it should only return the latest version of each template.
+            The interaction with the `status` parameter is as follows:
+
+            - If the `status` parameter is not set, it returns the latest
+            version of each template regardless of the status.
+
+            - If the `status` parameter is set to `PUBLISHED`, it returns the
+            latest published version of each template.
+
+            - If the `status` parameter is set to `DRAFT`, it returns the latest
+            draft version of each template.
+
+            - If the `status` parameter is set to `OBSOLETE`, it returns the
+            latest obsolete version of each template.
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListTemplates200'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: >
+        The maximum number of resources to retrieve.
+
+
+        If not set, the default limit of `10` is be used. The maximum value for
+        this parameter is `50`.
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 50
+    Cursor:
+      name: cursor
+      in: query
+      description: >
+        The cursor pointing to the first resource to be included in the
+        response. This cursor cannot be created and must have been extracted
+        from a response returned by a previous API call.
+
+
+        If this parameter is missing, the API returns the resources starting
+        from the first available resource, at index `0`.
+      schema:
+        type: string
+  schemas:
+    ConductAssessmentRequest:
+      description: >-
+        A request object to start conducting an assessment. It should contain at
+        least a `template` and a `name` or an `asset`. If you provide both a
+        name and an asset, the asset's name stored in Collibra is used as the
+        name of the assessment. When specified, the asset must have the same
+        asset type used in the template. In addition, if the `owner` is not
+        specified, the authenticated user is used as owner of the assessment.
+      type: object
+      properties:
+        template:
+          $ref: '#/components/schemas/BaseTemplate'
+        name:
+          description: The name of the assessment.
+          type: string
+          example: Legal Checks
+        asset:
+          $ref: '#/components/schemas/BaseAsset'
+        owner:
+          $ref: '#/components/schemas/BaseUser'
+        assignees:
+          description: The ID of the Collibra users or groups to be assigned as assignees.
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseUserOrGroupAssignee'
+        isVisibleToEveryone:
+          description: Whether the assessment is visible to Everyone in Collibra?
+          type: boolean
+          default: false
+          example: true
+      required:
+        - template
+      example:
+        template:
+          id: 002c7cac-92d0-451e-b979-8ef0857a34b4
+        name: >-
+          If an asset is provided, this name is replaced by the asset's name in
+          Collibra
+        asset:
+          id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+        owner:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+        assignees:
+          - type: USER
+            id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+          - type: GROUP
+            id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+        isVisibleToEveryone: false
+    PagedTemplates:
+      description: A page object containing templates.
+      type: object
+      properties:
+        nextCursor:
+          description: >-
+            The cursor pointing to the next page. If the cursor is missing,
+            there are no additional pages of resources available after the
+            current one.
+          type: string
+          example: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+      required:
+        - results
+    PagedAssessments:
+      description: A page object containing assessments.
+      type: object
+      properties:
+        nextCursor:
+          description: >-
+            The cursor pointing to the next page. If the cursor is missing,
+            there are no additional pages of resources available after the
+            current one.
+          type: string
+          example: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assessment'
+      required:
+        - results
+    Question:
+      description: An object that represents a question in assessments.
+      type: object
+      properties:
+        id:
+          description: The identifier of the question.
+          type: string
+          example: question1
+        name:
+          description: The name of the question.
+          type: string
+          example: Question name
+        description:
+          description: The description of the question.
+          type: string
+          example: Question description
+      required:
+        - id
+    BaseAnswer:
+      description: The base object for an answer.
+      type: object
+      properties:
+        type:
+          description: >-
+            The type of the answer to the question. Possible values are: `TEXT`,
+            `DATE`, `BOOLEAN`, `ITEMS`, or `ASSETS`.
+          type: string
+          example: TEXT
+      required:
+        - type
+    TextAnswer:
+      allOf:
+        - $ref: '#/components/schemas/BaseAnswer'
+        - type: object
+          description: An answer object containing a text.
+          properties:
+            value:
+              type: string
+          required:
+            - value
+          example:
+            type: TEXT
+            value: This is the text of the answer.
+    DateAnswer:
+      allOf:
+        - $ref: '#/components/schemas/BaseAnswer'
+        - type: object
+          description: >-
+            An answer object containing a date in ISO 8601 format, for example,
+            2017-07-21.
+          properties:
+            value:
+              type: string
+              format: date
+              x-field-extra-annotation: >-
+                @com.fasterxml.jackson.annotation.JsonFormat(shape =
+                com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING,
+                pattern = "yyyy-MM-dd")
+          required:
+            - value
+          example:
+            type: DATE
+            value: '2017-07-21'
+    BooleanAnswer:
+      allOf:
+        - $ref: '#/components/schemas/BaseAnswer'
+        - type: object
+          description: An answer object containing a boolean value.
+          properties:
+            value:
+              type: boolean
+          required:
+            - value
+          example:
+            type: BOOLEAN
+            value: true
+    ItemsAnswer:
+      allOf:
+        - $ref: '#/components/schemas/BaseAnswer'
+        - type: object
+          description: An answer object containing items.
+          properties:
+            value:
+              type: array
+              items:
+                $ref: '#/components/schemas/Item'
+          required:
+            - value
+          example:
+            type: ITEMS
+            value:
+              - id: choice1
+                value: My Choice
+    AssetsAnswer:
+      allOf:
+        - $ref: '#/components/schemas/BaseAnswer'
+        - type: object
+          description: An answer object containing assets.
+          properties:
+            value:
+              type: array
+              items:
+                $ref: '#/components/schemas/Asset'
+          required:
+            - value
+          example:
+            type: ASSETS
+            value:
+              - id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+                value: Direct Marketing
+    Answer:
+      description: The object for an answer.
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/TextAnswer'
+        - $ref: '#/components/schemas/DateAnswer'
+        - $ref: '#/components/schemas/BooleanAnswer'
+        - $ref: '#/components/schemas/ItemsAnswer'
+        - $ref: '#/components/schemas/AssetsAnswer'
+      discriminator:
+        propertyName: type
+        mapping:
+          TEXT: '#/components/schemas/TextAnswer'
+          DATE: '#/components/schemas/DateAnswer'
+          BOOLEAN: '#/components/schemas/BooleanAnswer'
+          ITEMS: '#/components/schemas/ItemsAnswer'
+          ASSETS: '#/components/schemas/AssetsAnswer'
+    QuestionAndAnswer:
+      description: An object containing a question and its answer.
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - type: object
+          properties:
+            answer:
+              $ref: '#/components/schemas/Answer'
+            comments:
+              description: The comments added to the question.
+              type: string
+    Item:
+      description: The object for an item.
+      type: object
+      properties:
+        id:
+          description: The ID of the selected item.
+          type: string
+          example: choice1
+        value:
+          description: The value of the selected item.
+          type: string
+          example: My First Choice
+      required:
+        - id
+    AssetType:
+      description: The object for an asset type in Collibra.
+      type: object
+      properties:
+        id:
+          description: The ID of the Collibra asset type.
+          type: string
+          format: uuid
+          example: 0b781899-3dd2-4746-bc98-65daef8f1efa
+        name:
+          description: The name of the Collibra asset type.
+          type: string
+          example: Business Process
+      required:
+        - id
+        - name
+    BaseAsset:
+      description: The base object for an asset in Collibra.
+      type: object
+      properties:
+        id:
+          description: The ID of the Collibra asset.
+          type: string
+          format: uuid
+          example: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+      required:
+        - id
+    Asset:
+      description: The object for an asset in Collibra.
+      allOf:
+        - $ref: '#/components/schemas/BaseAsset'
+        - type: object
+          properties:
+            name:
+              description: The name of the Collibra asset.
+              type: string
+              example: Direct Marketing
+          required:
+            - name
+    BaseUser:
+      description: A base object for users in Collibra.
+      type: object
+      properties:
+        id:
+          description: The ID of the Collibra user.
+          type: string
+          format: uuid
+          example: 0e787414-fd78-48a0-bfdd-69411b26c65b
+      required:
+        - id
+    User:
+      description: The object for a user in Collibra.
+      allOf:
+        - $ref: '#/components/schemas/BaseUser'
+        - type: object
+          properties:
+            name:
+              description: The name of the Collibra user.
+              type: string
+              example: Larissa Cohen
+          required:
+            - name
+    BaseGroup:
+      description: The base object for a user group in Collibra.
+      type: object
+      properties:
+        id:
+          description: The ID of the Collibra group.
+          type: string
+          format: uuid
+          example: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+      required:
+        - id
+    Group:
+      description: The object for a user group in Collibra.
+      allOf:
+        - $ref: '#/components/schemas/BaseGroup'
+        - type: object
+          properties:
+            name:
+              description: The name of the Collibra group.
+              type: string
+              example: Lawyers
+          required:
+            - name
+    BaseTypedUserOrGroupAssignee:
+      description: A base object for users and groups that are assignees.
+      type: object
+      properties:
+        type:
+          description: 'Possible values are: `USER` or `GROUP`.'
+          type: string
+          example: USER
+      required:
+        - type
+    BaseUserAssignee:
+      description: The base object for a Collibra user as an assignee.
+      allOf:
+        - $ref: '#/components/schemas/BaseTypedUserOrGroupAssignee'
+        - $ref: '#/components/schemas/BaseUser'
+      example:
+        type: USER
+        id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+    UserAssignee:
+      description: The object for a Collibra user as an assignee.
+      allOf:
+        - $ref: '#/components/schemas/BaseUserAssignee'
+        - $ref: '#/components/schemas/User'
+      example:
+        type: USER
+        id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+        name: Nelson Grant
+    BaseGroupAssignee:
+      description: The base object for a Collibra user group as an assignee.
+      allOf:
+        - $ref: '#/components/schemas/BaseTypedUserOrGroupAssignee'
+        - $ref: '#/components/schemas/BaseGroup'
+      example:
+        type: GROUP
+        id: 339bcad0-e00e-48db-ac52-62cd97f6bcee
+    GroupAssignee:
+      description: The object for a Collibra user group as an assignee.
+      allOf:
+        - $ref: '#/components/schemas/BaseGroupAssignee'
+        - $ref: '#/components/schemas/Group'
+      example:
+        type: GROUP
+        id: 339bcad0-e00e-48db-ac52-62cd97f6bcee
+        name: Everyone
+    UserOrGroupAssignee:
+      description: An object that represents a user or group as assignee.
+      oneOf:
+        - $ref: '#/components/schemas/UserAssignee'
+        - $ref: '#/components/schemas/GroupAssignee'
+      discriminator:
+        propertyName: type
+        mapping:
+          USER: '#/components/schemas/UserAssignee'
+          GROUP: '#/components/schemas/GroupAssignee'
+    BaseUserOrGroupAssignee:
+      description: An object that represents a base user or base group as assignee.
+      oneOf:
+        - $ref: '#/components/schemas/BaseUserAssignee'
+        - $ref: '#/components/schemas/BaseGroupAssignee'
+      discriminator:
+        propertyName: type
+        mapping:
+          USER: '#/components/schemas/BaseUserAssignee'
+          GROUP: '#/components/schemas/BaseGroupAssignee'
+    BaseTemplate:
+      description: A base template object.
+      type: object
+      properties:
+        id:
+          description: The ID of the template.
+          type: string
+          format: uuid
+          example: c8643d4d-f9f8-4484-b9c2-d0f3432e295f
+      required:
+        - id
+    Template:
+      description: A template object.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseTemplate'
+        - type: object
+          properties:
+            name:
+              description: The name of the template.
+              type: string
+              example: Legal Checks
+            version:
+              description: The version of the template.
+              type: integer
+              example: 1
+            status:
+              description: The status of the template.
+              type: string
+              example: PUBLISHED
+            assetType:
+              $ref: '#/components/schemas/AssetType'
+          required:
+            - name
+            - version
+            - status
+    AssessmentStatus:
+      description: >-
+        The status of an assessment. Possible values are: `DRAFT`, `SUBMITTED`,
+        `COMPLETED`, or `OBSOLETE`.
+      type: string
+    Assessment:
+      description: An assessment object.
+      type: object
+      properties:
+        id:
+          description: The ID of the assessment.
+          type: string
+          format: uuid
+          example: 7460c00f-3b12-4238-b68d-4ec4ea8bf9f7
+        name:
+          description: The name of the assessment.
+          type: string
+          example: Direct Marketing
+        asset:
+          $ref: '#/components/schemas/Asset'
+        status:
+          $ref: '#/components/schemas/AssessmentStatus'
+        template:
+          $ref: '#/components/schemas/Template'
+        owner:
+          $ref: '#/components/schemas/User'
+        assignees:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserOrGroupAssignee'
+        content:
+          description: The set of questions and answers of the assessment.
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAndAnswer'
+        createdOn:
+          description: The date and time of the assessment creation.
+          type: string
+          format: date-time
+          x-field-extra-annotation: >-
+            @com.fasterxml.jackson.annotation.JsonFormat(shape =
+            com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern =
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+          example: '2023-07-10T15:03:10.433Z'
+        createdBy:
+          $ref: '#/components/schemas/User'
+        lastModifiedOn:
+          description: The date and time of the assessment last update.
+          type: string
+          format: date-time
+          x-field-extra-annotation: >-
+            @com.fasterxml.jackson.annotation.JsonFormat(shape =
+            com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern =
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+          example: '2023-07-10T15:03:10.433Z'
+        lastModifiedBy:
+          $ref: '#/components/schemas/User'
+        submittedOn:
+          description: The date and time of the assessment submission.
+          type: string
+          format: date-time
+          x-field-extra-annotation: >-
+            @com.fasterxml.jackson.annotation.JsonFormat(shape =
+            com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern =
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+          example: '2023-07-10T15:10:10.433Z'
+        submittedBy:
+          $ref: '#/components/schemas/User'
+        assessmentReview:
+          $ref: '#/components/schemas/Asset'
+      required:
+        - id
+        - name
+        - status
+        - template
+        - content
+        - createdOn
+        - createdBy
+        - lastModifiedOn
+        - lastModifiedBy
+        - owner
+        - assignees
+    StandardErrorResponse:
+      description: A standard error response object.
+      type: object
+      properties:
+        statusCode:
+          description: HTTP response code.
+          type: integer
+          example: 500
+        titleMessage:
+          description: The title of the error message.
+          type: string
+          example: Internal Server Error
+        helpMessage:
+          description: A message containing actions you can take regarding the error.
+          type: string
+          example: Please check the application logs for more information.
+        userMessage:
+          description: A user friendly error message.
+          type: string
+          example: There was an error processing the request.
+        errorCode:
+          description: An error code identifier.
+          type: string
+          example: unexpectedError
+      required:
+        - statusCode
+        - userMessage
+  examples:
+    PagedListOfTemplatesNoResults:
+      value:
+        results: []
+    PagedListOfTemplatesMoreResults:
+      value:
+        nextCursor: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo
+        results:
+          - id: c8643d4d-f9f8-4484-b9c2-d0f3432e295f
+            name: Legal Checks
+            version: 1
+            status: PUBLISHED
+            assetType:
+              id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+              name: Business Process
+    PagedListOfAssessmentsNoResults:
+      value:
+        results: []
+    PagedListOfAssessmentsMoreResults:
+      value:
+        nextCursor: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo=
+        results:
+          - id: 60dfe2b6-0215-4a30-86dd-4ee235a1821e
+            name: Direct Marketing
+            asset:
+              id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+              name: Direct Marketing
+            status: DRAFT
+            template:
+              id: c8643d4d-f9f8-4484-b9c2-d0f3432e295f
+              name: Legal Checks
+              version: 1
+              status: PUBLISHED
+              assetType:
+                id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+                name: Business Process
+            owner:
+              id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+              name: Larissa Cohen
+            assignees:
+              - type: USER
+                id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+                name: Nelson Grant
+              - type: GROUP
+                id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+                name: Lawyers
+            content:
+              - id: legalBasisSpecified
+                name: Are all legal bases specified?
+                answer:
+                  type: BOOLEAN
+                  value: true
+                comment: We use Legitimate interest as the legal basis.
+            createdOn: '2023-07-10T15:03:10.433Z'
+            createdBy:
+              id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+              name: Larissa Cohen
+            lastModifiedOn: '2023-07-10T18:43:10.433Z'
+            lastModifiedBy:
+              id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+              name: Larissa Cohen
+    AssessmentAllDetails:
+      value:
+        id: 07ed39f5-be3b-4406-a09e-3c78a8734261
+        name: Direct Marketing
+        asset:
+          id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+          name: Direct Marketing
+        status: SUBMITTED
+        template:
+          id: c8643d4d-f9f8-4484-b9c2-d0f3432e295f
+          name: Legal Checks
+          version: 1
+          status: PUBLISHED
+          assetType:
+            id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+            name: Business Process
+        owner:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        assignees:
+          - type: USER
+            id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+            name: Nelson Grant
+          - type: GROUP
+            id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+            name: Lawyers
+        content:
+          - id: legalBasisSpecified
+            name: Are all legal bases specified?
+            answer:
+              type: BOOLEAN
+              value: true
+            comment: We use Legitimate interest as the legal basis.
+        createdOn: '2023-07-10T15:03:10.433Z'
+        createdBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        lastModifiedOn: '2023-07-10T18:43:10.433Z'
+        lastModifiedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        submittedOn: '2023-07-10T18:43:10.433Z'
+        submittedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        assessmentReview:
+          id: b50c1532-4f84-4551-bfc8-a123845fedf5
+          name: Legal Checks (v1) => Direct Marketing
+    AssessmentMissingCollibraDetails:
+      value:
+        id: 07ed39f5-be3b-4406-a09e-3c78a8734261
+        name: Direct Marketing
+        asset:
+          id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+          name: Couldn't retrieve information from Collibra
+        status: SUBMITTED
+        template:
+          id: c8643d4d-f9f8-4484-b9c2-d0f3432e295f
+          name: Legal Checks
+          version: 1
+          status: PUBLISHED
+          assetType:
+            id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+            name: Couldn't retrieve information from Collibra
+        owner:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Couldn't retrieve information from Collibra
+        assignees:
+          - type: USER
+            id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+            name: Couldn't retrieve information from Collibra
+          - type: GROUP
+            id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+            name: Couldn't retrieve information from Collibra
+        content:
+          - id: legalBasisSpecified
+            name: Are all legal bases specified?
+            answer:
+              type: BOOLEAN
+              value: true
+            comments: We use Legitimate interest as the legal basis.
+        createdOn: '2023-07-10T15:03:10.433Z'
+        createdBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Couldn't retrieve information from Collibra
+        lastModifiedOn: '2023-07-10T18:43:10.433Z'
+        lastModifiedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Couldn't retrieve information from Collibra
+        submittedOn: '2023-07-10T18:43:10.433Z'
+        submittedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Couldn't retrieve information from Collibra
+        assessmentReview:
+          id: b50c1532-4f84-4551-bfc8-a123845fedf5
+          name: Couldn't retrieve information from Collibra
+    AssessmentNoQuestionsAllDetails:
+      value:
+        id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name: Direct Marketing
+        asset:
+          id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+          name: Direct Marketing
+        status: DRAFT
+        template:
+          id: 002c7cac-92d0-451e-b979-8ef0857a34b4
+          name: Audit Checks
+          version: 1
+          status: PUBLISHED
+          assetType:
+            id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+            name: Business Process
+        owner:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        assignees:
+          - type: USER
+            id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+            name: Nelson Grant
+          - type: GROUP
+            id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+            name: Lawyers
+        content: []
+        createdOn: '2023-07-10T15:03:10.433Z'
+        createdBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+        lastModifiedOn: '2023-07-10T18:43:10.433Z'
+        lastModifiedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+          name: Larissa Cohen
+    AssessmentNoQuestionsMissingCollibraDetails:
+      value:
+        id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name: Direct Marketing
+        asset:
+          id: 9e6ba6fa-ae24-41c8-9b42-08e7c4231689
+        status: DRAFT
+        template:
+          id: 002c7cac-92d0-451e-b979-8ef0857a34b4
+          name: Audit Checks
+          version: 1
+          status: PUBLISHED
+          assetType:
+            id: 0b781899-3dd2-4746-bc98-65daef8f1efa
+        owner:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+        assignees:
+          - type: USER
+            id: d615a9fe-8d8c-4287-80aa-5b058519ca45
+          - type: GROUP
+            id: 387b34f5-eac8-467c-89b6-5ee7c2e7368b
+        content: []
+        createdOn: '2023-07-10T15:03:10.433Z'
+        createdBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+        lastModifiedOn: '2023-07-10T18:43:10.433Z'
+        lastModifiedBy:
+          id: 0e787414-fd78-48a0-bfdd-69411b26c65b
+  responses:
+    ListAssessments200:
+      description: Example of a response for listing assessments.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedAssessments'
+          examples:
+            Example of a response with an empty list of assessments and no more results.:
+              $ref: '#/components/examples/PagedListOfAssessmentsNoResults'
+            Example of a response with a list of assessments and where more results are available.:
+              $ref: '#/components/examples/PagedListOfAssessmentsMoreResults'
+    GetAssessment200:
+      description: Example of a response for retrieving an assessment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Assessment'
+          examples:
+            Example of a response with assessment details containing information from Collibra.:
+              $ref: '#/components/examples/AssessmentAllDetails'
+            Example of a response with assessment details but without information from Collibra.:
+              $ref: '#/components/examples/AssessmentMissingCollibraDetails'
+    ListTemplates200:
+      description: Example of a response for listing templates.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedTemplates'
+          examples:
+            Example of a response with an empty list of templates and no more results.:
+              $ref: '#/components/examples/PagedListOfTemplatesNoResults'
+            Example of a response with a list of templates and more results are available.:
+              $ref: '#/components/examples/PagedListOfTemplatesMoreResults'
+    PostConductAssessment201:
+      description: Example of a response for conducting an assessment.
+      headers:
+        Location:
+          description: The URL of the added assessment.
+          schema:
+            type: string
+            format: uri
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Assessment'
+          examples:
+            Example of a response with the assessment created which contains information from Collibra.:
+              $ref: '#/components/examples/AssessmentNoQuestionsAllDetails'
+    InvalidRequest400:
+      description: The request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 400
+            titleMessage: Invalid Request
+            helpMessage: Please check the parameters provided.
+            userMessage: The request is not valid.
+            errorCode: invalidRequest
+    InvalidRequest401:
+      description: The client is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 401
+            titleMessage: Unauthorized
+            helpMessage: Please check your credentials or contact an administrator.
+            userMessage: Failed to authenticate request through basic credentials
+            errorCode: authenticationFailed
+    InvalidRequest403:
+      description: The user lacks permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 403
+            titleMessage: Forbidden
+            helpMessage: Contact your administrator about roles and permissions.
+            userMessage: You don't have permission to perform the request.
+            errorCode: authorizationFailed
+    InvalidRequest404:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 404
+            titleMessage: Not Found
+            helpMessage: Please check the parameters provided.
+            userMessage: The resource could not be found.
+            errorCode: notFound
+    InvalidRequest500:
+      description: There was an error processing the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 500
+            titleMessage: Internal Server Error
+            helpMessage: Please check the application logs for more information.
+            userMessage: There was an error processing the request.
+            errorCode: unexpectedError
+  securitySchemes:
+    basicAuth:
+      description: This API requires Basic HTTP authentication.
+      type: http
+      scheme: basic

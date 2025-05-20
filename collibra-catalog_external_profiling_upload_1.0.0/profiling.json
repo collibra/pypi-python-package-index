@@ -1,0 +1,368 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Collibra Catalog External Profiling Upload API",
+    "description": "<p>This API is used to manually push profiling data.</p>",
+    "version": "1.0",
+    "x-audience": "public"
+  },
+  "servers": [
+    {
+      "url": "/rest/catalog/1.0",
+      "variables": {}
+    }
+  ],
+  "tags": [
+    {
+      "name": "Profiling",
+      "description": "Data profiling operations"
+    }
+  ],
+  "paths": {
+    "/profiling/columns": {
+      "patch": {
+        "tags": [
+          "Profiling"
+        ],
+        "summary": "Updates column profiles.",
+        "description": "A value is updated only if the relative property is supplied.\nIn order to delete a value, its property must be set to null in the request.",
+        "operationId": "updateColumnsProfilingData",
+        "requestBody": {
+          "description": "The column profiles to update.\nIf a property is not set it's ignored (not updated)\nIf a property is set to null it's deleted.\n\nA valid assetIdentifer contains one of the following combinations:\n- id\n- assetName, domainId\n- communityName, assetName, domainName\n\nStrings containing numeric value must use `.` as decimal separator. No thousands separator should be used. In scientific notation, an `E` should separate the mantissa from the exponent, with no other extra character.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataProfilingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The profile(s) update was successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProfilingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Errors occurred, no column profile was updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProfilingResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DataProfilingResponse": {
+        "type": "object",
+        "properties": {
+          "updatedColumnsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AssetIdentifier": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetName": {
+            "type": "string"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "communityName": {
+            "type": "string"
+          },
+          "domainName": {
+            "type": "string"
+          }
+        }
+      },
+      "CategoricalMetadata": {
+        "type": "object",
+        "properties": {
+          "categorical": {
+            "type": "boolean"
+          },
+          "categoriesFrequencies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "ColumnProfile": {
+        "required": [
+          "assetIdentifier"
+        ],
+        "type": "object",
+        "properties": {
+          "assetIdentifier": {
+            "$ref": "#/components/schemas/AssetIdentifier"
+          },
+          "columnName": {
+            "type": "string"
+          },
+          "technicalDataType": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "columnPosition": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/Counts"
+          },
+          "samples": {
+            "$ref": "#/components/schemas/Samples"
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/Statistics"
+          },
+          "databaseMetadata": {
+            "$ref": "#/components/schemas/DatabaseMetadata"
+          },
+          "categoricalMetadata": {
+            "$ref": "#/components/schemas/CategoricalMetadata"
+          },
+          "quantiles": {
+            "$ref": "#/components/schemas/Quantiles"
+          },
+          "distributions": {
+            "$ref": "#/components/schemas/Distributions"
+          }
+        }
+      },
+      "Counts": {
+        "type": "object",
+        "properties": {
+          "rowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "emptyValuesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctValuesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mode": {
+            "type": "string"
+          }
+        }
+      },
+      "DataProfilingRequest": {
+        "type": "object",
+        "properties": {
+          "columnProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColumnProfile"
+            }
+          }
+        }
+      },
+      "DatabaseMetadata": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          },
+          "numberOfDecimalDigits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "charOctetLength": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "columnSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "primaryKeyName": {
+            "type": "string"
+          },
+          "isNullable": {
+            "type": "boolean"
+          },
+          "isAutoIncremented": {
+            "type": "boolean"
+          },
+          "isGenerated": {
+            "type": "boolean"
+          },
+          "isPrimaryKey": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Distributions": {
+        "type": "object",
+        "properties": {
+          "distributionDensityEstimation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Point"
+            }
+          },
+          "histogram": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistogramBin"
+            }
+          }
+        }
+      },
+      "HistogramBin": {
+        "type": "object",
+        "properties": {
+          "lowerBound": {
+            "type": "string"
+          },
+          "upperBound": {
+            "type": "string"
+          },
+          "frequency": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lowerBoundInISODateFormat": {
+            "type": "string"
+          },
+          "upperBoundInISODateFormat": {
+            "type": "string"
+          }
+        }
+      },
+      "Point": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Quantiles": {
+        "type": "object",
+        "properties": {
+          "percentile1": {
+            "type": "string"
+          },
+          "percentile5": {
+            "type": "string"
+          },
+          "decile1": {
+            "type": "string"
+          },
+          "quartile1": {
+            "type": "string"
+          },
+          "median": {
+            "type": "string"
+          },
+          "quartile3": {
+            "type": "string"
+          },
+          "decile9": {
+            "type": "string"
+          },
+          "percentile95": {
+            "type": "string"
+          },
+          "percentile99": {
+            "type": "string"
+          }
+        }
+      },
+      "Samples": {
+        "type": "object",
+        "properties": {
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Statistics": {
+        "type": "object",
+        "properties": {
+          "mean": {
+            "type": "number",
+            "format": "double"
+          },
+          "variance": {
+            "type": "number",
+            "format": "double"
+          },
+          "standardDeviation": {
+            "type": "number",
+            "format": "double"
+          },
+          "minimum": {
+            "type": "string"
+          },
+          "maximum": {
+            "type": "string"
+          },
+          "minimumTextLength": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maximumTextLength": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}

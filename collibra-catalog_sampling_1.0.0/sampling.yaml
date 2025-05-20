@@ -1,0 +1,462 @@
+openapi: 3.0.3
+info:
+  title: Catalog Sampling API
+  description: >-
+    <p>The Catalog Sampling API offers functionality related to the Collibra
+    Data Catalog application.<br/> It is mainly focused on facilitating the
+    ingestion of information into Data Catalog.<br/> The API enables you to more
+    easily connect Data Catalog to sources that are not necessarily natively
+    supported in the product.</p>
+  version: 1.0.0
+  x-audience: public
+servers:
+  - url: /rest/catalogSampling/v1
+tags:
+  - name: Samples
+    description: Data sampling operations
+paths:
+  '/samples/{assetId}/request':
+    post:
+      tags:
+        - Samples
+      summary: >-
+        Create a request to collect and cache sample data for an Edge data
+        source
+      description: >-
+        Creates a request to collect sample data from an Edge data source for
+        the asset with the specified ID and temporarily makes it available in
+        the Edge cache.
+      operationId: requestSamples
+      parameters:
+        - name: assetId
+          in: path
+          description: Asset identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: >-
+            Samples were successfully requested. <br/>Returns job object which
+            is running the fetching samples process and flag indicating if the
+            new job was started to fetch samples or there was already one which
+            existed before.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestSamplesResponse'
+        '400':
+          description: 'The parameter is not a valid UUID for asset type: Column or Table.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardErrorResponse'
+              example:
+                statusCode: 400
+                titleMessage: Invalid Request
+                helpMessage: Please check the application logs for more information.
+                userMessage: The request is not valid.
+                errorCode: invalidRequest
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          description: The user lacks permission to view samples for the requested asset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardErrorResponse'
+              example:
+                statusCode: 403
+                titleMessage: Forbidden
+                helpMessage: Please check the application logs for more information.
+                userMessage: The user does not have the required permissions.
+                errorCode: authorizationFailed
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/samples/{assetId}':
+    get:
+      tags:
+        - Samples
+      summary: Read sample data from the Collibra cloud repository or Edge cache
+      description: >-
+        Reads the available sample data from the Collibra cloud repository or
+        Edge cache depending on how the data is collected.
+      operationId: readSamples
+      parameters:
+        - name: columnLimit
+          in: query
+          description: >-
+            The maximum number of columns to retrieve. If not set (columnLimit =
+            <code>0</code>), the default column limit will be used. Maximum is
+            set to 1500.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: columnOffset
+          in: query
+          description: >-
+            The index of the fist column to retrieve. If not set (columnOffset =
+            <code>0</code>), results will be retrieved starting from column
+            <code>0</code>.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: assetId
+          in: path
+          description: Asset identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: >-
+            Samples were successfully read. Returns the paginated list of
+            columns with the list of the ordered samples that were fetched
+            during request samples process.<br/>Returns additional flags: <br/>
+            isDataAvailable flag indicating if any samples for any column are
+            available within the response. <br/>canRequestAdditionalData flag
+            indicating if the requestSamples API can be called to query the
+            target database for the additional samples.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSamplesResponse'
+        '400':
+          description: 'The parameter is not a valid UUID for asset type: Column or Table.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardErrorResponse'
+              example:
+                statusCode: 400
+                titleMessage: Invalid Request
+                helpMessage: Please check the application logs for more information.
+                userMessage: The request is not valid.
+                errorCode: invalidRequest
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          description: >-
+            The user lacks permission to any of the columns within the requested
+            asset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardErrorResponse'
+              example:
+                statusCode: 403
+                titleMessage: Forbidden
+                helpMessage: Please check the application logs for more information.
+                userMessage: The user does not have the required permissions.
+                errorCode: authorizationFailed
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '503':
+          $ref: '#/components/responses/InvalidRequest503'
+      security:
+        - basicAuth: []
+components:
+  schemas:
+    ReadSamplesResponse:
+      description: Represents the response returned when sample data is read.
+      properties:
+        dataAvailable:
+          type: boolean
+          description: >-
+            Whether any sample data is available for the columns in the
+            response.
+        canRequestAdditionalData:
+          type: boolean
+          description: >-
+            Whether the requestSamples API can be called to query the target
+            database for sample data.
+        columnPagedResponse:
+          $ref: '#/components/schemas/ColumnPagedResponse'
+        error:
+          $ref: '#/components/schemas/StandardErrorResponse'
+    ColumnPagedResponse:
+      properties:
+        columnOffset:
+          type: integer
+          format: int64
+          description: The number of results to skip in the response.
+        columnLimit:
+          type: integer
+          format: int64
+          description: The maximum number of results in the response.
+        columnTotal:
+          type: integer
+          format: int64
+          description: The total number of results in the response.
+        columns:
+          type: array
+          description: The column array containing the sample data.
+          items:
+            $ref: '#/components/schemas/SampleColumn'
+    SampleColumn:
+      properties:
+        id:
+          type: string
+          description: The ID of the column asset.
+          format: uuid
+        name:
+          type: string
+          description: The name of the column asset.
+        displayName:
+          type: string
+          description: The display name of the column asset.
+        tableName:
+          type: string
+          description: The table asset name the column asset belongs to.
+        samples:
+          type: array
+          description: Sample data for a given column asset.
+          items:
+            type: string
+        samplingStatus:
+          type: string
+          description: >
+            The processing status for column assets.
+
+            The column can be missing (not found in the cache) or forbidden if
+            the user lacks permissions.
+          enum:
+            - OK
+            - MISSING
+            - FORBIDDEN
+    RequestSamplesResponse:
+      description: Represents the response returned when sample data is requested.
+      properties:
+        newJob:
+          type: boolean
+          description: Whether this is a newly created job or one that is in progress.
+        job:
+          $ref: '#/components/schemas/Job'
+    Job:
+      required:
+        - id
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the represented object (entity).
+          format: uuid
+        createdBy:
+          type: string
+          description: The id of the user that created this resource.
+          format: uuid
+          example: 4d250cc5-e583-4640-9874-b93d82c7a6cb
+        createdOn:
+          type: integer
+          description: >-
+            The timestamp (in UTC time standard) of the creation of this
+            resource.
+          format: int64
+          example: 1475503010320
+        lastModifiedBy:
+          type: string
+          description: The id of the user who modified this resource the last time.
+          format: uuid
+          example: a073ff90-e7bc-4b35-ba90-c4d475f642fe
+        lastModifiedOn:
+          type: integer
+          description: >-
+            The timestamp (in UTC time standard) of the last modification of
+            this resource.
+          format: int64
+          example: 1476703764163
+        system:
+          type: boolean
+          description: Whether this is a system resource or not.
+        resourceType:
+          type: string
+          description: >
+            The type of this resource, i.e. [Community, Asset, Domain,
+            Attribute, Relation, WorkflowInstance].
+          enum:
+            - View
+            - Asset
+            - Community
+            - Domain
+            - AssetType
+            - DomainType
+            - Status
+            - User
+            - ClassificationMatch
+            - UserGroup
+            - Attribute
+            - StringAttribute
+            - ScriptAttribute
+            - BooleanAttribute
+            - DateAttribute
+            - NumericAttribute
+            - SingleValueListAttribute
+            - MultiValueListAttribute
+            - Comment
+            - Attachment
+            - Responsibility
+            - Workflow
+            - Job
+            - Relation
+            - RelationType
+            - ComplexRelation
+            - ComplexRelationType
+            - ArticulationRule
+            - Assignment
+            - Scope
+            - RelationTrace
+            - ValidationRule
+            - DataQualityRule
+            - DataQualityMetric
+            - Address
+            - InstantMessagingAccount
+            - Email
+            - PhoneNumber
+            - Website
+            - Activity
+            - FormProperty
+            - WorkflowTask
+            - ActivityChange
+            - WorkflowInstance
+            - Role
+            - AttributeType
+            - BooleanAttributeType
+            - DateAttributeType
+            - DateTimeAttributeType
+            - MultiValueListAttributeType
+            - NumericAttributeType
+            - ScriptAttributeType
+            - SingleValueListAttributeType
+            - StringAttributeType
+            - ViewSharingRule
+            - ViewAssignmentRule
+            - JdbcDriverFile
+            - JdbcDriver
+            - JdbcIngestionProperties
+            - CsvIngestionProperties
+            - ExcelIngestionProperties
+            - ConnectionStringParameter
+            - AssignedCharacteristicType
+            - Notification
+            - Tag
+            - ComplexRelationLegType
+            - ComplexRelationAttributeType
+            - ComplexRelationLeg
+            - BaseDataType
+            - AdvancedDataType
+            - DiagramPicture
+            - DiagramPictureSharingRule
+            - DiagramPictureAssignmentRule
+            - Rating
+            - Classification
+            - PhysicalDataConnector
+            - Context
+        name:
+          type: string
+          description: The name of the resource.
+          example: Test name
+        type:
+          type: string
+          description: The type of the job.
+          example: IMPORT
+        userId:
+          type: string
+          description: The ID of the user that initiated this job.
+          format: uuid
+        progressPercentage:
+          type: number
+          description: The progress percentage of the job.
+          format: double
+          example: 50
+        startDate:
+          type: integer
+          description: The start date of the job.
+          format: int64
+          example: 1488016800
+        endDate:
+          type: integer
+          description: The end date of the job.
+          format: int64
+          example: 1488021800
+        state:
+          type: string
+          description: The state of the job.
+          example: COMPLETED
+          enum:
+            - WAITING
+            - RUNNING
+            - CANCELING
+            - COMPLETED
+            - CANCELED
+            - ERROR
+        message:
+          type: string
+          description: The message of the job.
+          example: Import finished in 12s.
+      description: >-
+        Represents a job. Job is a single atomic task that is to be performed
+        asynchronously.
+    StandardErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP response code
+        titleMessage:
+          type: string
+        helpMessage:
+          type: string
+        userMessage:
+          type: string
+        errorCode:
+          type: string
+  responses:
+    InvalidRequest401:
+      description: The user is not authenticated to use this API.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 401
+            titleMessage: Unauthorized
+            helpMessage: Please check the application logs for more information.
+            userMessage: Failed to authenticate request through basic credentials
+            errorCode: authenticationFailed
+    InvalidRequest404:
+      description: The asset can't be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 404
+            titleMessage: Not Found
+            helpMessage: Please check the application logs for more information.
+            userMessage: The resource could not be found
+            errorCode: notFound
+    InvalidRequest503:
+      description: External edge service timeout or failure.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 503
+            titleMessage: Edge Error
+            helpMessage: Please check the application logs for more information.
+            userMessage: External edge service timeout or failure
+            errorCode: edgeError
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic

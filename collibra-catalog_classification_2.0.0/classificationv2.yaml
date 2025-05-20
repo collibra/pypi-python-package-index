@@ -1,0 +1,480 @@
+openapi: 3.0.3
+info:
+  version: 2.0.0-unstable
+  x-audience: public
+  title: Collibra Catalog Classification API
+  description: >
+    Version 2 of the Catalog Classification API offers functionality related to
+    the classification process and facilitates searching for and managing the
+    associations between a data class and a data category. Use version 1 of the
+    API for managing classifications and legacy data classes.
+servers:
+  - url: /rest/catalogClassification/v2
+tags:
+  - name: Classification Process
+    description: The start of the classification process.
+  - name: Classification Data Category
+    description: Classification category operations
+paths:
+  /classify:
+    post:
+      summary: Starts a process that classifies requested assets.
+      description: API to start a process of classification.
+      operationId: startClassificationProcess
+      tags:
+        - Classification Process
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificationProcessRequest'
+      responses:
+        '202':
+          description: Classification process started.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationProcessResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  '/dataClasses/{dataClassId}/dataCategories':
+    post:
+      summary: Associate data class with data category
+      operationId: connectDataCategoryDataClass
+      tags:
+        - Classification Data Category
+      parameters:
+        - name: dataClassId
+          in: path
+          description: >-
+            The ID of the data class to which the data category will be
+            associated.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The ID of the data category to be associated with the data class.
+        content:
+          application/json:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        '201':
+          description: The newly created classification category association.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataClassDataCategoryConnection'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '422':
+          $ref: '#/components/responses/InvalidRequest422'
+      security:
+        - basicAuth: []
+  '/dataClasses/{dataClassId}/dataCategories/{dataCategoryId}':
+    delete:
+      summary: Remove existing association between a data class and a data category
+      operationId: disconnectDataCategoryDataClass
+      tags:
+        - Classification Data Category
+      parameters:
+        - name: dataClassId
+          in: path
+          description: >-
+            The ID of the data class from which the data category will be
+            removed.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: dataCategoryId
+          in: path
+          description: The ID of the data category to be removed.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Removed the association between data class and data category.
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+  /dataClasses/dataCategories:
+    get:
+      summary: Retrieve the association with a data category and a data class.
+      operationId: getAssociationDataClassDataCategory
+      tags:
+        - Classification Data Category
+      parameters:
+        - name: dataCategoryId
+          in: query
+          description: >-
+            The ID of the data category for which you want to see the associated
+            data classes.
+          schema:
+            type: string
+            format: uuid
+        - name: dataClassId
+          in: query
+          description: >-
+            The ID of the data class for which you want to see the associated
+            data categories.
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: The list of associations with a data category and a data classes.
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/DataClassDataCategoryConnectionsPagedResponse
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+      security:
+        - basicAuth: []
+components:
+  parameters:
+    Offset:
+      name: offset
+      in: query
+      description: >
+        The index of the first result to retrieve.
+
+
+        If not set (offset = <code>0</code>), results are retrieved starting
+        from row <code>0</code>.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    Limit:
+      name: limit
+      in: query
+      description: >
+        The maximum number of results to retrieve.
+
+
+        If not set, the default limit  (limit = <code>0</code>) is used. The
+        maximum value for this parameter is
+
+        <code>1000<code>.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        maximum: 1000
+  schemas:
+    ClassificationProcessRequest:
+      description: Requests to start a classification process.
+      type: object
+      required:
+        - assetIds
+      properties:
+        assetIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: The ids of the assets to classify.
+    ClassificationProcessResponse:
+      description: Represents the response returned when classification process starts.
+      properties:
+        jobId:
+          type: string
+          description: The ID of the newly started job.
+          format: uuid
+    DataClassDataCategoryConnectionsPagedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          description: The list of results.
+          items:
+            $ref: '#/components/schemas/DataClassDataCategoryConnection'
+    Classification:
+      description: Represents classification of data.
+      type: object
+      required:
+        - id
+        - resourceType
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the represented object (entity).
+        name:
+          type: string
+          example: Test name
+          description: The name of the resource.
+        createdBy:
+          type: string
+          format: uuid
+          description: The ID of the user who created this resource.
+          example: 4d250cc5-e583-4640-9874-b93d82c7a6cb
+        createdOn:
+          type: integer
+          format: int64
+          description: >-
+            The Unix timestamp in milliseconds (in UTC time standard) of the
+            resource creation date.
+          example: 1475503010320
+        lastModifiedBy:
+          type: string
+          format: uuid
+          description: The ID of the user who last modified this resource.
+          example: a073ff90-e7bc-4b35-ba90-c4d475f642fe
+        lastModifiedOn:
+          type: integer
+          format: int64
+          description: >-
+            The Unix timestamp in milliseconds (in UTC time standard) the
+            resource last modified date.
+          example: 1476703764163
+        system:
+          description: Whether this is a system resource or not.
+          type: boolean
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+    DataClassDataCategoryConnection:
+      type: object
+      description: An association between a data class and a data category.
+      required:
+        - id
+        - resourceType
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the represented object (entity).
+        dataClass:
+          $ref: '#/components/schemas/Classification'
+        dataCategory:
+          $ref: '#/components/schemas/NamedResourceReferenceImpl'
+        createdBy:
+          type: string
+          format: uuid
+          description: The ID of the user who created this resource.
+          example: 4d250cc5-e583-4640-9874-b93d82c7a6cb
+        createdOn:
+          type: integer
+          format: int64
+          description: >-
+            The Unix timestamp in milliseconds (in UTC time standard) of the
+            resource creation date.
+          example: 1475503010320
+        lastModifiedBy:
+          type: string
+          format: uuid
+          description: The ID of the user who last modified this resource.
+          example: a073ff90-e7bc-4b35-ba90-c4d475f642fe
+        lastModifiedOn:
+          type: integer
+          format: int64
+          description: >-
+            The Unix timestamp in milliseconds (in UTC time standard) the
+            resource last modified date.
+          example: 1476703764163
+        system:
+          type: boolean
+          description: Whether this is a system resource or not.
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+    NamedResourceReferenceImpl:
+      description: 'A reference to the resource, including its name.'
+      type: object
+      required:
+        - id
+        - resourceType
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the referenced resource.
+          example: 2b7f3a1a-4e50-4077-96f0-a58a395c860d
+        name:
+          type: string
+          description: The name of the referenced resource.
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+    ResourceType:
+      type: string
+      description: >-
+        The type of the resource, for example [Community, Asset, Domain,
+        Attribute, Relation, WorkflowInstance].
+      enum:
+        - View
+        - Asset
+        - Community
+        - Domain
+        - AssetType
+        - DomainType
+        - Status
+        - User
+        - ClassificationMatch
+        - UserGroup
+        - Attribute
+        - StringAttribute
+        - ScriptAttribute
+        - BooleanAttribute
+        - DateAttribute
+        - NumericAttribute
+        - SingleValueListAttribute
+        - MultiValueListAttribute
+        - Comment
+        - Attachment
+        - Responsibility
+        - Workflow
+        - Job
+        - Relation
+        - RelationType
+        - ComplexRelation
+        - ComplexRelationType
+        - ArticulationRule
+        - Assignment
+        - Scope
+        - RelationTrace
+        - ValidationRule
+        - DataQualityRule
+        - DataQualityMetric
+        - Address
+        - InstantMessagingAccount
+        - Email
+        - PhoneNumber
+        - Website
+        - Activity
+        - FormProperty
+        - WorkflowTask
+        - ActivityChange
+        - WorkflowInstance
+        - Role
+        - AttributeType
+        - BooleanAttributeType
+        - DateAttributeType
+        - DateTimeAttributeType
+        - MultiValueListAttributeType
+        - NumericAttributeType
+        - ScriptAttributeType
+        - SingleValueListAttributeType
+        - StringAttributeType
+        - ViewSharingRule
+        - ViewAssignmentRule
+        - JdbcDriverFile
+        - JdbcDriver
+        - JdbcIngestionProperties
+        - CsvIngestionProperties
+        - ExcelIngestionProperties
+        - ConnectionStringParameter
+        - AssignedCharacteristicType
+        - Notification
+        - Tag
+        - ComplexRelationLegType
+        - ComplexRelationAttributeType
+        - ComplexRelationLeg
+        - BaseDataType
+        - AdvancedDataType
+        - DiagramPicture
+        - DiagramPictureSharingRule
+        - DiagramPictureAssignmentRule
+        - Rating
+        - Classification
+        - PhysicalDataConnector
+        - Context
+      example: Asset
+    StandardErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: The HTTP response code.
+        titleMessage:
+          type: string
+        helpMessage:
+          type: string
+        userMessage:
+          type: string
+        errorCode:
+          type: string
+  responses:
+    InvalidRequest400:
+      description: The request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 400
+            titleMessage: Invalid Request
+            helpMessage: Please check the application logs for more information.
+            userMessage: The request is not valid.
+            errorCode: invalidRequest
+    InvalidRequest401:
+      description: The client is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 401
+            titleMessage: Unauthorized
+            helpMessage: Please check the application logs for more information.
+            userMessage: Failed to authenticate request through basic credentials.
+            errorCode: authenticationFailed
+    InvalidRequest403:
+      description: The user lacks the required permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 403
+            titleMessage: Forbidden
+            helpMessage: Please check the application logs for more information.
+            userMessage: The user does not have the required permissions.
+            errorCode: authorizationFailed
+    InvalidRequest404:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 404
+            titleMessage: Not Found
+            helpMessage: Please check the application logs for more information.
+            userMessage: The resource could not be found.
+            errorCode: Not found
+    InvalidRequest422:
+      description: Associations between provided Assets and Data Class already exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 422
+            titleMessage: Unprocessable Entity
+            helpMessage: Please check the application logs for more information.
+            userMessage: Associations between provided Assets and Data Class already exist
+            errorCode: Unprocessable Entity
+  securitySchemes:
+    basicAuth:
+      description: The APIs require Basic HTTP authentication.
+      type: http
+      scheme: basic

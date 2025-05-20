@@ -1,0 +1,1398 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  x-audience: public
+  title: Collibra Protect API
+  description: This API allows you to manage groups.
+servers:
+  - url: /rest/protect/v1
+tags:
+  - name: Groups
+    description: Manage groups.
+  - name: Prescriptive Paths
+    description: Manage prescriptive paths.
+  - name: Custom Maskings
+    description: Manage custom maskings.
+  - name: Data Sources
+    description: Manage data sources.
+paths:
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: List groups
+      description: Lists all available groups.
+      operationId: listGroups
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/After'
+      responses:
+        '200':
+          description: The list of groups.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedGroups'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Groups
+      summary: Add a new group
+      description: Adds a new group.
+      operationId: addGroup
+      requestBody:
+        description: The group to add.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupRequest'
+            examples:
+              Add a group for Snowflake only:
+                value:
+                  name: Sales
+                  mappings:
+                    - provider: Snowflake
+                      identity: SALES
+              Add a group for Google BigQuery only:
+                value:
+                  name: Sales
+                  mappings:
+                    - provider: GoogleBigQuery
+                      identity: 'group:sales@example.com'
+              Add a group for AWS Lake Formation only:
+                value:
+                  name: Sales
+                  mappings:
+                    - provider: AWSLakeFormation
+                      identity: 'arn:aws:iam::123456789012:group/sales'
+              Add a group with multiple mappings:
+                value:
+                  name: Sales
+                  mappings:
+                    - provider: Snowflake
+                      identity: SALES
+                    - provider: GoogleBigQuery
+                      identity: 'group:sales@example.com'
+      responses:
+        '201':
+          description: The group has been added.
+          headers:
+            Location:
+              description: The URL of the added group.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/groups/{id}':
+    get:
+      tags:
+        - Groups
+      summary: Retrieve a group
+      description: Returns information about the group with the specified ID.
+      operationId: getGroup
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the group.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The group with the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Groups
+      summary: Delete a group
+      description: Deletes the group with the specified ID.
+      operationId: deleteGroup
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the group.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: The group has been deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Groups
+      summary: Update a group
+      description: Updates the group with the specified ID.
+      operationId: patchGroup
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the group.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The changes that need to be applied to the group.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeGroupRequest'
+      responses:
+        '200':
+          description: Group has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /prescriptivePaths:
+    post:
+      tags:
+        - Prescriptive Paths
+      summary: Add a new prescriptive path
+      description: Adds a new prescriptive path.
+      operationId: addPrescriptivePath
+      requestBody:
+        description: The prescriptive path to add.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPrescriptivePathRequest'
+      responses:
+        '201':
+          description: The prescriptive path has been added.
+          headers:
+            Location:
+              description: The URL of the added prescriptive path.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptivePath'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - Prescriptive Paths
+      summary: Lists all available prescriptive paths
+      description: >-
+        Returns the prescriptive path information for the asset type with the
+        specified ID.
+      operationId: listPrescriptivePaths
+      responses:
+        '200':
+          description: All available prescriptive paths.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptivePaths'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /prescriptivePaths/assetTypes:
+    get:
+      tags:
+        - Prescriptive Paths
+      summary: List asset types supported by Protect
+      operationId: listAssetTypes
+      responses:
+        '200':
+          description: The list of asset type ids supported by Protect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetTypeIds'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/prescriptivePaths/{assetTypeId}':
+    get:
+      tags:
+        - Prescriptive Paths
+      summary: Retrieve a prescriptive path
+      description: >-
+        Returns the prescriptive path information for the asset type with the
+        specified ID.
+      operationId: getPrescriptivePath
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the asset type.
+          name: assetTypeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: >-
+            The prescriptive path information for the asset type with the
+            specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptivePath'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Prescriptive Paths
+      summary: Update a prescriptive path
+      description: Updates the prescriptive path for the asset type with the specified ID.
+      operationId: patchPrescriptivePath
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the asset type.
+          name: assetTypeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The changes that need to be applied to the prescriptive path.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePrescriptivePathRequest'
+      responses:
+        '200':
+          description: The prescriptive path has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptivePath'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Prescriptive Paths
+      summary: Delete a prescriptive path
+      description: Deletes the prescriptive path for the asset type with the specified ID.
+      operationId: deletePrescriptivePath
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the asset type.
+          name: assetTypeId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: The prescriptive path has been deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /customMaskings:
+    get:
+      tags:
+        - Custom Maskings
+      summary: List custom maskings
+      description: Lists all custom maskings.
+      operationId: listCustomMaskings
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/After'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListCustomMaskings200'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Custom Maskings
+      summary: Add a new custom masking
+      description: Adds a new custom masking.
+      operationId: addCustomMasking
+      requestBody:
+        description: The new custom masking you want to add.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCustomMaskingRequest'
+      responses:
+        '201':
+          description: The custom masking has been added.
+          headers:
+            Location:
+              description: The URL of the newly added custom masking.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMasking'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/customMaskings/{id}':
+    get:
+      tags:
+        - Custom Maskings
+      summary: Retrieve a custom masking
+      description: Returns information about the custom masking with the specified ID.
+      operationId: getCustomMasking
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the custom masking.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The custom masking with the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMasking'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Custom Maskings
+      summary: Delete a custom masking
+      description: Deletes the custom masking with the specified ID.
+      operationId: deleteCustomMasking
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the custom masking.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: The custom masking has been deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Custom Maskings
+      summary: Update a custom masking
+      description: Updates the custom masking with the specified ID.
+      operationId: patchCustomMasking
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the custom masking.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The changes that need to be applied to the custom masking.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeCustomMaskingRequest'
+      responses:
+        '200':
+          description: The custom masking has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMasking'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  /dataSources:
+    get:
+      tags:
+        - Data Sources
+      summary: List data sources
+      description: Lists all data sources.
+      operationId: listDataSources
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/After'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListDataSources200'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - Data Sources
+      summary: Add a new data source
+      description: Adds a new data source.
+      operationId: addDataSource
+      requestBody:
+        description: The new data source you want to add.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDataSourceRequest'
+      responses:
+        '201':
+          description: The data source has been added.
+          headers:
+            Location:
+              description: The URL of the newly added data source.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+  '/dataSources/{id}':
+    get:
+      tags:
+        - Data Sources
+      summary: Retrieve a data source
+      description: Returns information about the data source with the specified ID.
+      operationId: getDataSource
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the data source.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The data source with the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSource'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - Data Sources
+      summary: Delete a data source
+      description: Deletes the data source with the specified ID.
+      operationId: deleteDataSource
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the data source.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: The data source has been deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - Data Sources
+      summary: Update a data source
+      description: Updates the data source with the specified ID.
+      operationId: patchDataSource
+      parameters:
+        - in: path
+          description: The universally unique identifier (UUID) of the data source.
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: The changes that need to be applied to the data source.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeDataSourceRequest'
+      responses:
+        '200':
+          description: The data source has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest400'
+        '401':
+          $ref: '#/components/responses/InvalidRequest401'
+        '403':
+          $ref: '#/components/responses/InvalidRequest403'
+        '404':
+          $ref: '#/components/responses/InvalidRequest404'
+        '409':
+          $ref: '#/components/responses/InvalidRequest409'
+        '500':
+          $ref: '#/components/responses/InvalidRequest500'
+      security:
+        - basicAuth: []
+components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: >
+        This is the maximum number of results that may be returned. Fewer may be
+        returned than the value of <code>limit</code>.
+
+
+        Do not depend on the number of results being fewer than the
+        <code>limit</code> value
+
+        to indicate that your query reached the end of the list of data, use the
+        absence of <code>after</code> (see Cursors) instead.
+
+        For example, if you set <code>limit</code> to 10 and 9 results are
+        returned, there may be more data available.
+
+
+        If not set, the default limit (limit = <code>25</code>) will be used.
+        The maximum value for this parameter is <code>500</code>.
+      schema:
+        type: integer
+        default: 25
+        minimum: 1
+        maximum: 500
+    After:
+      name: after
+      in: query
+      description: >-
+        This is the cursor that points to the end of the page of data that has
+        been returned.
+      schema:
+        type: string
+        nullable: true
+  schemas:
+    PagedGroups:
+      description: A page of groups.
+      type: object
+      properties:
+        cursors:
+          $ref: '#/components/schemas/Cursors'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+      required:
+        - cursors
+        - results
+    Cursors:
+      description: >
+        A cursor refers to a random string of characters which marks a specific
+        item in a list of data.
+
+        The cursor will always point to the item, however it will be invalidated
+        if the item is deleted or removed.
+
+        Therefore, your app shouldn't store cursors or assume that they will be
+        valid in the future.
+      type: object
+      properties:
+        after:
+          description: >-
+            This is the cursor that points to the end of the page of data that
+            has been returned.
+          type: string
+          example: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo
+    AddGroupRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/EditableGroup'
+    ChangeGroupRequest:
+      type: object
+      properties:
+        name:
+          description: The name of the group.
+          type: string
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMapping'
+    EditableGroup:
+      type: object
+      properties:
+        name:
+          description: The name of the group.
+          type: string
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMapping'
+      required:
+        - name
+        - mappings
+    Group:
+      type: object
+      properties:
+        id:
+          description: The ID of the group.
+          type: string
+          format: uuid
+        createdBy:
+          description: Id of the Collibra user who created this group
+          type: string
+          format: uuid
+        createdOn:
+          description: Timestamp when this group is created
+          type: integer
+          format: int64
+        lastModifiedBy:
+          description: Id of the Collibra user who last updated this group
+          type: string
+          format: uuid
+        lastModifiedOn:
+          description: Timestamp when this group has last been updated
+          type: integer
+          format: int64
+      allOf:
+        - $ref: '#/components/schemas/EditableGroup'
+      required:
+        - id
+        - createdBy
+        - createdOn
+        - lastModifiedBy
+        - lastModifiedOn
+    Provider:
+      type: string
+      description: 'Value must be "Snowflake", "GoogleBigQuery, or "AWSLakeFormation"'
+      example: Snowflake
+    GroupMapping:
+      description: >-
+        This dictionary describes to which Snowflake, GoogleBigQuery or
+        AWSLakeFormation roles this group maps to.
+      type: object
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        identity:
+          description: 'An existing Snowflake, GoogleBigQuery or AWSLakeFormation role.'
+          type: string
+      required:
+        - provider
+        - identity
+    AssetTypeIds:
+      description: An array of asset type ids.
+      type: array
+      items:
+        type: string
+        format: uuid
+    PrescriptivePaths:
+      description: An array of prescriptive paths.
+      type: array
+      items:
+        $ref: '#/components/schemas/PrescriptivePath'
+    EditablePrescriptivePath:
+      type: object
+      properties:
+        description:
+          type: string
+        relations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptivePathRelation'
+      required:
+        - relations
+    PrescriptivePathAssetType:
+      type: object
+      properties:
+        assetTypeId:
+          type: string
+          format: uuid
+        relation:
+          $ref: '#/components/schemas/PrescriptivePathRelation'
+    PrescriptivePathRelation:
+      type: object
+      properties:
+        relationTypeId:
+          type: string
+          format: uuid
+        relationTypeDirection:
+          $ref: '#/components/schemas/RelationTypeDirection'
+        assetType:
+          $ref: '#/components/schemas/PrescriptivePathAssetType'
+      required:
+        - relationTypeId
+        - relationTypeDirection
+        - assetType
+    RelationTypeDirection:
+      type: string
+      description: >
+        Indicates whether the PrescriptivePathAssetType containing a
+        PrescriptivePathRelation is the
+
+        head/source or tail/target of that relation type. The only allowed
+        values are SOURCE and TARGET.
+    PrescriptivePath:
+      type: object
+      properties:
+        assetTypeId:
+          description: The ID of the prescriptive path's asset type.
+          type: string
+          format: uuid
+        createdBy:
+          description: Id of the Collibra user who created this group
+          type: string
+          format: uuid
+        createdOn:
+          description: Timestamp when this prescriptive path was created
+          type: integer
+          format: int64
+        lastModifiedBy:
+          description: Id of the Collibra user who last updated this prescriptive path
+          type: string
+          format: uuid
+        lastModifiedOn:
+          description: Timestamp when this prescriptive path has last been updated
+          type: integer
+          format: int64
+      allOf:
+        - $ref: '#/components/schemas/EditablePrescriptivePath'
+      required:
+        - assetTypeId
+        - createdBy
+        - createdOn
+        - lastModifiedBy
+        - lastModifiedOn
+    AddPrescriptivePathRequest:
+      type: object
+      properties:
+        assetTypeId:
+          description: The ID of the prescriptive path's asset type.
+          type: string
+          format: uuid
+      allOf:
+        - $ref: '#/components/schemas/EditablePrescriptivePath'
+      required:
+        - assetTypeId
+    ChangePrescriptivePathRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/EditablePrescriptivePath'
+    PagedCustomMaskings:
+      description: A page of custom maskings.
+      type: object
+      properties:
+        cursors:
+          $ref: '#/components/schemas/Cursors'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomMasking'
+      required:
+        - cursors
+        - results
+    AddCustomMaskingRequest:
+      allOf:
+        - $ref: '#/components/schemas/EditableCustomMasking'
+    ChangeCustomMaskingRequest:
+      type: object
+      properties:
+        name:
+          description: The name of the custom masking.
+          type: string
+          example: myCustomHashing
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderMaskingMappings'
+    EditableCustomMasking:
+      type: object
+      properties:
+        name:
+          description: The name of the custom masking.
+          type: string
+          example: myCustomHashing
+        mappings:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProviderMaskingMappings'
+      required:
+        - name
+        - mappings
+      example:
+        name: myCustomHashing
+        mappings:
+          - provider: Snowflake
+            mappings:
+              - dataType: string
+                functionName: hash_my_string
+              - dataType: number
+                functionName: hash_my_number
+          - provider: Databricks
+            mappings:
+              - dataType: string
+                functionName: hash_my_string
+    ProviderMaskingMappings:
+      description: >-
+        This dictionary describes a list of mappings of data types and the
+        function name used to provide custom mapping for one provider
+        (Snowflake, GoogleBigQuery, or AWSLakeFormation).
+      type: object
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskingMapping'
+      required:
+        - provider
+        - mappings
+    MaskingMapping:
+      description: >-
+        a mapping of the data type and function name used to provide the custom
+        mapping.
+      properties:
+        dataType:
+          type: string
+          description: >-
+            The name of the data type (String, Number, Date ...). Data types
+            name depend on the provider, a list of compatible types per provider
+            is available in the documentation.
+          example: String
+        functionName:
+          type: string
+          description: >-
+            The name of the function that will be used on the provider to
+            provide the custom masking.
+          example: hash_my_string
+      required:
+        - dataType
+        - functionName
+    CustomMasking:
+      allOf:
+        - $ref: '#/components/schemas/EditableCustomMasking'
+        - type: object
+          properties:
+            id:
+              description: The ID of the masking.
+              type: string
+              format: uuid
+              example: fc422bf7-b873-49fc-a00e-ec550a3e9aa5
+            createdBy:
+              description: ID of the Collibra user who created this custom mapping.
+              type: string
+              format: uuid
+              example: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            createdOn:
+              description: The timestamp of when this custom mapping was created
+              type: integer
+              format: int64
+              example: 1688024863616
+            lastModifiedBy:
+              description: ID of the Collibra user who last updated this custom mapping.
+              type: string
+              format: uuid
+              example: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            lastModifiedOn:
+              description: The timestamp of when this custom mapping was last updated.
+              type: integer
+              format: int64
+              example: 1688024863616
+          required:
+            - id
+            - createdBy
+            - createdOn
+            - lastModifiedBy
+            - lastModifiedOn
+    PagedDataSources:
+      description: A page of data sources.
+      type: object
+      properties:
+        cursors:
+          $ref: '#/components/schemas/Cursors'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSource'
+      required:
+        - cursors
+        - results
+    AddDataSourceRequest:
+      allOf:
+        - $ref: '#/components/schemas/EditableDataSource'
+    ChangeDataSourceRequest:
+      type: object
+      properties:
+        name:
+          description: The name of the data source.
+          type: string
+          example: Google BigQuery
+        dataSourceName:
+          description: >-
+            The value of the "Data Source Type" attribute on the Database asset.
+            It is also used in group mapping as the "provider" name
+          type: string
+          example: GoogleBigQuery
+        dataSourceAliases:
+          description: >-
+            A list of aliases for the data source name used in the "Data Source
+            Type" attribute on the Database asset.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourceAlias'
+    DataSourceAlias:
+      description: Alias name for a data source.
+      type: string
+      example: BigQuery
+    EditableDataSource:
+      type: object
+      properties:
+        name:
+          description: The name of the data source.
+          type: string
+          example: Google BigQuery
+        dataSourceName:
+          description: >-
+            The value of the "Data Source Type" attribute on the Database asset.
+            It is also used in group mapping as the "provider" name
+          type: string
+          example: GoogleBigQuery
+        dataSourceAliases:
+          description: >-
+            A list of aliases for the data source name used in the "Data Source
+            Type" attribute on the Database asset.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourceAlias'
+      required:
+        - name
+        - dataSourceName
+      example:
+        name: Google BigQuery
+        dataSourceName: GoogleBigQuery
+        dataSourceAliases:
+          - BigQuery
+    DataSource:
+      allOf:
+        - $ref: '#/components/schemas/EditableDataSource'
+        - type: object
+          properties:
+            id:
+              description: The ID of the data source.
+              type: string
+              format: uuid
+              example: fc422bf7-b873-49fc-a00e-ec550a3e9aa5
+            isBuiltIn:
+              description: Indicates whether the data source is protect built-in or not.
+              type: boolean
+              default: false
+              example: true
+            createdBy:
+              description: ID of the Collibra user who created this data source.
+              type: string
+              format: uuid
+              example: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            createdOn:
+              description: The timestamp of when this data source was created
+              type: integer
+              format: int64
+              example: 1688024863616
+            lastModifiedBy:
+              description: ID of the Collibra user who last updated this data source.
+              type: string
+              format: uuid
+              example: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            lastModifiedOn:
+              description: The timestamp of when this data source was last updated.
+              type: integer
+              format: int64
+              example: 1688024863616
+          required:
+            - id
+            - createdBy
+            - createdOn
+            - lastModifiedBy
+            - lastModifiedOn
+    StandardErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP response code
+          example: 400
+        titleMessage:
+          type: string
+          description: The title of the error message.
+          example: Invalid Request
+        helpMessage:
+          type: string
+          description: A message containing actions you can take regarding the error.
+          example: Please check the application logs for more information.
+        userMessage:
+          type: string
+          description: A user friendly error message.
+          example: The request is not valid.
+        errorCode:
+          type: string
+          description: An error code identifier.
+          example: invalidRequest
+      required:
+        - statusCode
+        - userMessage
+  responses:
+    InvalidRequest400:
+      description: The request is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 400
+            titleMessage: Invalid Request
+            helpMessage: Please check the application logs for more information.
+            userMessage: The request is not valid.
+            errorCode: invalidRequest
+    InvalidRequest401:
+      description: The client is not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 401
+            titleMessage: Unauthorized
+            helpMessage: Please check the application logs for more information.
+            userMessage: Failed to authenticate request through basic credentials
+            errorCode: authenticationFailed
+    InvalidRequest403:
+      description: The user lacks permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 403
+            titleMessage: Forbidden
+            helpMessage: Please check the application logs for more information.
+            userMessage: The user does not have the required permissions.
+            errorCode: authorizationFailed
+    InvalidRequest404:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 404
+            titleMessage: Not Found
+            helpMessage: Please check the application logs for more information.
+            userMessage: The resource could not be found
+            errorCode: notfound
+    InvalidRequest409:
+      description: Conflicts found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 409
+            titleMessage: Conflict
+            helpMessage: Please check the application logs for more information.
+            userMessage: Some business validation failed
+            errorCode: conflict
+    InvalidRequest500:
+      description: An unexpected error has occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StandardErrorResponse'
+          example:
+            statusCode: 500
+            titleMessage: Internal Server Error
+            helpMessage: Please check the application logs for more information.
+            userMessage: An unexpected error has occurred.
+            errorCode: unexpectedError
+    ListCustomMaskings200:
+      description: The list of custom maskings.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedCustomMaskings'
+          examples:
+            Example of response with an empty custom maskings list and no results:
+              $ref: '#/components/examples/PagedListOfCustomMaskingsNoResults'
+            Example of response with a list of custom maskings and additional results:
+              $ref: '#/components/examples/PagedListOfCustomMaskingsMoreResults'
+    ListDataSources200:
+      description: The list of data sources.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedDataSources'
+          examples:
+            Example of response with an empty data sources list and no results:
+              $ref: '#/components/examples/PagedListOfDataSourcesNoResults'
+            Example of response with a list of data sources and additional results:
+              $ref: '#/components/examples/PagedListOfDataSourcesMoreResults'
+  examples:
+    PagedListOfCustomMaskingsNoResults:
+      value:
+        cursors:
+          after: null
+        results: []
+    PagedListOfCustomMaskingsMoreResults:
+      value:
+        cursors:
+          after: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo=
+        results:
+          - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+            name: myCustomHashing
+            createdBy: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            createdOn: 1688024863616
+            lastModifiedBy: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            lastModifiedOn: 1688024863616
+            mappings:
+              - provider: Snowflake
+                mappings:
+                  - dataType: String
+                    functionName: hash_my_string
+                  - dataType: Number
+                    functionName: hash_my_number
+              - provider: Databricks
+                mappings:
+                  - dataType: String
+                    functionName: hash_my_string
+                  - dataType: Number
+                    functionName: hash_my_number
+    PagedListOfDataSourcesNoResults:
+      value:
+        cursors:
+          after: null
+        results: []
+    PagedListOfDataSourcesMoreResults:
+      value:
+        cursors:
+          after: Y3Vyc29yV2hlblRoZXJlSXNNb3JlRGF0YQo=
+        results:
+          - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+            name: Google BigQuery
+            isBuiltIn: true
+            dataSourceName: GoogleBigQuery
+            dataSourceAliases:
+              - BigQuery
+            createdBy: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            createdOn: 1688024863616
+            lastModifiedBy: 19d09600-73ee-4be9-bff3-5e99f5c074f6
+            lastModifiedOn: 1688024863616
+  securitySchemes:
+    basicAuth:
+      description: The APIs require Basic HTTP authentication.
+      type: http
+      scheme: basic
