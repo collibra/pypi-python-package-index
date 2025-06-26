@@ -54,13 +54,13 @@ class Attribute(object):
     }
 
     discriminator_value_class_map = {
-            'BooleanAttribute'.lower(): '#/components/schemas/BooleanAttribute',
-            'DateAttribute'.lower(): '#/components/schemas/DateAttribute',
-            'MultiValueListAttribute'.lower(): '#/components/schemas/MultiValueListAttribute',
-            'NumericAttribute'.lower(): '#/components/schemas/NumericAttribute',
-            'ScriptAttribute'.lower(): '#/components/schemas/ScriptAttribute',
-            'SingleValueListAttribute'.lower(): '#/components/schemas/SingleValueListAttribute',
-            'StringAttribute'.lower(): '#/components/schemas/StringAttribute',
+            'BooleanAttribute'.lower(): 'BooleanAttribute',
+            'DateAttribute'.lower(): 'DateAttribute',
+            'MultiValueListAttribute'.lower(): 'MultiValueListAttribute',
+            'NumericAttribute'.lower(): 'NumericAttribute',
+            'ScriptAttribute'.lower(): 'ScriptAttribute',
+            'SingleValueListAttribute'.lower(): 'SingleValueListAttribute',
+            'StringAttribute'.lower(): 'StringAttribute',
     }
 
     def __init__(self, asset=None, value=None, type=None, last_modified_on=None, resource_type=None, created_by=None, last_modified_by=None, created_on=None, system=None, id=None):  # noqa: E501
