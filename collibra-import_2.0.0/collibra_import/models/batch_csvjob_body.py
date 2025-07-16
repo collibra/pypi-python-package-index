@@ -65,7 +65,7 @@ class BatchCsvjobBody(object):
         'template': 'template'
     }
 
-    def __init__(self, send_notification=False, batch_size=1000, simulation=False, save_result=False, file_id=None, file=None, file_name='synchronization_file', delete_file=False, continue_on_error=False, separator=';', quote='"', escape='\', strict_quotes=False, ignore_leading_whitespace=False, header_row=False, template=None):  # noqa: E501
+    def __init__(self, send_notification=False, batch_size=1000, simulation=False, save_result=False, file_id=None, file=None, file_name='synchronization_file', delete_file=False, continue_on_error=False, separator=';', quote='"', escape='\\', strict_quotes=False, ignore_leading_whitespace=False, header_row=False, template=None):  # noqa: E501
         """BatchCsvjobBody - a model defined in Swagger"""  # noqa: E501
         self._send_notification = None
         self._batch_size = None

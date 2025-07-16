@@ -69,7 +69,7 @@ class SynchronizationIdCsvjobBody(object):
         'template': 'template'
     }
 
-    def __init__(self, send_notification=False, batch_size=1000, simulation=False, save_result=False, file_id=None, file=None, file_name='synchronization_file', delete_file=False, continue_on_error=False, finalization_strategy='REMOVE_RESOURCES', missing_asset_status_id=None, separator=';', quote='"', escape='\', strict_quotes=None, ignore_leading_whitespace=None, header_row=None, template=None):  # noqa: E501
+    def __init__(self, send_notification=False, batch_size=1000, simulation=False, save_result=False, file_id=None, file=None, file_name='synchronization_file', delete_file=False, continue_on_error=False, finalization_strategy='REMOVE_RESOURCES', missing_asset_status_id=None, separator=';', quote='"', escape='\\', strict_quotes=None, ignore_leading_whitespace=None, header_row=None, template=None):  # noqa: E501
         """SynchronizationIdCsvjobBody - a model defined in Swagger"""  # noqa: E501
         self._send_notification = None
         self._batch_size = None
