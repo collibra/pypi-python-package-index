@@ -48,9 +48,9 @@ class AssignedCharacteristicType(object):
     }
 
     discriminator_value_class_map = {
-            'AttributeType'.lower(): '#/components/schemas/AssignedAttributeType',
-            'ComplexRelationType'.lower(): '#/components/schemas/AssignedComplexRelationType',
-            'RelationType'.lower(): '#/components/schemas/AssignedRelationType',
+        'attributetype': 'AssignedAttributeType',
+        'complexrelationtype': 'AssignedComplexRelationType',
+        'relationtype': 'AssignedRelationType',
     }
 
     def __init__(self, assigned_resource_type=None, minimum_occurrences=None, maximum_occurrences=None, assigned_resource_id=None, read_only=None, system=None, id=None):  # noqa: E501
